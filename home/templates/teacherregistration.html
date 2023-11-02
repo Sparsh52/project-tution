@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block start %}
+<div style="background-image: url('https://www.venkateshwaragroup.in/vgiblog/wp-content/uploads/2022/09/Untitled-design-2-1-1050x525.jpg'); background-repeat: no-repeat; background-position: center; background-size: cover; height: 100vh; width: 100vw; position: absolute">
+    <div class="container mt-5">
+        <form class="col-6 mx-auto card p-3 shadow-lg" action="{% url 'register_teacher' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" name="phone" id="exampleInputEmail1" aria-describedby="emailHelp">
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputPassword1" class="form-label">Subject-1</label>
+                    <input type="text" class="form-control" name="last_name" id="exampleInputPassword1">
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputPassword1" class="form-label">Subject-2</label>
+                    <input type="text" class="form-control" name="last_name" id="exampleInputPassword1">
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputPassword1" class="form-label">Subject-3</label>
+                    <input type="text" class="form-control" name="last_name" id="exampleInputPassword1">
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputPassword1" class="form-label">Experience</label>
+                    <input type="number" class="form-control" name="last_name" id="exampleInputPassword1">
+                </div>
+                <label for="exampleDataList" class="form-label">Gender</label>
+                <select class="form-control" id="id_institution_type" name="gender">
+                    <option value="School">Male</option>
+                    <option value="College">Female</option>
+                </select>
+            <div class="form-group">
+                <input class="btn btn-danger btn-lg btn-block" type="submit" value="Submit">
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
