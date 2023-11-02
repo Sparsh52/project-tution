@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 
 class Subject(models.Model):
     subject=models.CharField(max_length=100)
+    def __str__(self):
+        return self.subject
 
 class Gender(models.Model):
     GENDER_CHOICES = [
@@ -12,6 +14,8 @@ class Gender(models.Model):
         ('Female', 'Female'),
     ]
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, blank=False,null=False)
+    def __str__(self):
+        return self.gender
 
 class Teacher(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -24,8 +28,8 @@ class Teacher(models.Model):
     # teacher_image=models.ImageField(upload_to="teacher",blank=True, null=True)
     # def admin_photo(self):
     #     return mark_safe(f'<img src="{self.teacher_image.url}" width="100" />')
-    # def str(self):
-    #     return self.user.username
+    def __str__(self):
+        return self.user.username
 
 class Student(models.Model):
     user=models.ForeignKey(User, on_delete=models.CASCADE)
@@ -36,3 +40,5 @@ class Student(models.Model):
     ]
     institution_type = models.CharField(max_length=10, choices=INSTITUTION_TYPES, blank=False)
     standard_or_semester=models.CharField(max_length=100,blank=False,null=False)
+    def __str__(self):
+        return self.user.username

@@ -64,6 +64,7 @@ def extracted_from_home(fm, data, request):
       messages.error(request, 'Password must be at least 8 characters long.')
    else:
       user = User.objects.create_user(username=name, email=email, password=password)
+      messages.success(request, 'I have taken notice!')
       request.session['reg_type'] = reg_type
       request.session['user_id'] = user.id
       return (
