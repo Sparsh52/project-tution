@@ -10,11 +10,15 @@
                     <label for="exampleInputEmail1" class="form-label">Phone Number</label>
                     <input type="tel" class="form-control" name="phone" id="exampleInputEmail1" aria-describedby="emailHelp">
                 </div>
-                <label for="exampleDataList" class="form-label">Institution Type</label>
+                <labevscode-file://vscode-app/c:/Users/sparsh.chawla/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/code/electron-sandbox/workbench/workbench.htmll for="exampleDataList" class="form-label">Institution Type</label>
                 <select class="form-control" id="id_institution_type" name="ins_type">
                     <option value="School">School</option>
-                    <option value="College">College</option>
+                    <option value="University">University</option>
                 </select>
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Institution Name</label>
+                    <input type="text" class="form-control" name="institution_name" id="exampleInputEmail1" aria-describedby="emailHelp">
+                </div>
                 <div id="semesterField" style="display: none;">
                     <label for="exampleDataList" class="form-label">Semester</label>
                     <input class="form-control" type="text" name="semester" placeholder="Semester">
@@ -39,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function() {
         var semesterField = document.getElementById("semesterField");
         var standardField = document.getElementById("standardField");
 
-        if (institutionType === "College") {
+        if (institutionType === "University") {
             semesterField.style.display = "block";
             standardField.style.display = "none";
         } else {

@@ -46,10 +46,11 @@ class Student(models.Model):
     user=models.ForeignKey(User, on_delete=models.CASCADE)
     phone = models.CharField(max_length=100, blank=False)
     INSTITUTION_TYPES = [
-        ('school', 'School'),
-        ('college', 'University'),
+        ('School', 'School'),
+        ('University', 'University'),
     ]
     institution_type = models.CharField(max_length=10, choices=INSTITUTION_TYPES, blank=False)
     standard_or_semester=models.CharField(max_length=100,blank=False,null=False)
+    institution_name=models.CharField(max_length=100,blank=False,null=False)
     def __str__(self):
         return self.user.username
