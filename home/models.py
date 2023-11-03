@@ -35,6 +35,13 @@ class Teacher(models.Model):
             return mark_safe(f'<img src="{self.teacher_image.url}" width="100" />')
         default_image = 'default_male_image.jpg' if self.gender.gender == 'Male' else 'default_female_image.png'
         return mark_safe(f'<img src="/media/teacher/{default_image}" width="100" />')
+    
+    @property
+    def teacher_image_url(self):
+        if self.teacher_image:
+            return self.teacher_image.url
+        default_image = 'default_male_image.jpg' if self.gender.gender == 'Male' else 'default_female_image.png'
+        return f"/media/teacher/{default_image}"
 
     
 

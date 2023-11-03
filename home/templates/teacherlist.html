@@ -1,0 +1,80 @@
+{% extends "base2.html" %}
+{% block content %}
+<!-- Teacher List Section -->
+<section class="colorful jumbotron mb-0" role="banner">
+    <!-- Navigation section remains the same -->
+    <div class="container teachers-container">
+
+        <div class="row mt-2 justify-content-between">
+            <div class="col-md-8 text-white align-self-center mb-2 p-4">
+                <h1 style="color:#000000"><b><i>Meet Our Teachers</i><b></h1>
+                <p style="color:#000000">
+                    <b>Explore our talented teaching team and find the perfect match for your learning needs.</b>   
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="search-container mb-5 pb-5">
+    <div class="container">
+        <div class="row">
+
+            <!-- Filtering Form Column -->
+            <div class="col-lg-3 shadow-lg rounded">
+                <div class="row my-3">
+                    <form  action="/filter-teachers" method="GET">
+                        {% csrf_token %}
+                        <!-- Add any other filtering options as needed -->
+                        <div class="col-md-12">
+                            <label for="hourlyPrice">Hourly Price</label>
+                            <input type="number" name="hourlyPrice" id="hourlyPrice" class="form-control">
+                        </div><br>
+                        <div class="col-md-12">
+                            <label for="experience">Experience</label><br>
+                            <input type="number" name="experience" id="experience" class="form-control">
+                        </div><br>
+                        <!-- Add more filtering options if necessary -->
+                        <div class="col-md-12">
+                            <input type="submit" class="btn btn-primary btn-block" value="Apply Filters">
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Teacher Information Column -->
+            <div class="col-lg-9 px-4 mb-5">
+
+                <!-- Teacher List (Filtered or Complete) -->
+                {% for teacher in teachers %}
+                    <div class="row search-card-result rounded shadow-lg mb-4">
+                        <!-- Teacher Image Column -->
+                        <div class="col-md-3">
+                            <!-- Display teacher image -->
+                            <img class="img-fluid rounded-top" src="{{ teacher.teacher_image_url }}" alt="Teacher Image">
+                        </div>
+            
+                        <!-- Teacher Details Column -->
+                        <div class="col-md-5">
+                            <div class="card-body">
+                                <p class="card-title">Teacher Name:{{ teacher.user.username }}</p><br>
+                                <p class="card-text">years of experience: {{ teacher.experience }} years </p><br>
+                            </div>
+                        </div>
+            
+                        <!-- Additional Information Column -->
+                        <div class="col-md-4 border-left text-center more-offers">
+                            <!-- Display additional information about the teacher -->
+                            <p>Email: {{ teacher.user.email }}</p>
+                            <p>Phone: {{ teacher.phone }}</p>
+                            <!-- Add more information if necessary -->
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

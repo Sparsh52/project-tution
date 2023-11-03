@@ -24,10 +24,16 @@ def home(request):
          return redirect('home')
       else:
          login(request,user)
-         return HttpResponse("You are in u son of a bitch!")
-
-
+         return redirect('/teachers-list/')
    return render(request,"login.html")
+
+
+
+def teachers_list(request):
+   queryset=Teacher.objects.all()
+   print(queryset)
+   context = {'teachers': queryset}
+   return render(request,"teacherlist.html",context)
 
 def register(request):
    fm = UserRegistration()
