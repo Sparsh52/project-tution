@@ -36,7 +36,58 @@ def register(request):
 #     send_mail(subject, message, email_from, recipient_list)
 
 def register_teacher(request):
-   return render(request,"teacherregistration.html")
+    reg_type = request.session.get('reg_type')
+    user_id = request.session.get('user_id')
+    user = User.objects.get(id=user_id)
+
+    # Check if the user is already registered as a teacher
+    if Teacher.objects.filter(user=user).exists():
+        messages.error(request, 'You are already registered as a teacher.')
+        return redirect('home')
+    if request.method == 'POST':
+      return _extracted_from_registerTeacher_6(request, user)
+    return render(request, 'teacherregistration.html')
+
+# TODO Rename this here and in `registerTeacher`
+def _extracted_from_registerTeacher_6(request, user):
+    data = request.POST
+    phone = data['phone']
+    sub1 = data['sub1']
+    sub2 = data['sub2']
+    sub3 = data['sub3']
+    exp = data['exp']
+    gender = data['gender']
+    img = request.FILES.get('teacher_image')
+    if img is not None:
+      print('Yeah!')
+    else:
+      print('Nah man!')
+    gender_instance,_=Gender.objects.get_or_create(gender=gender.title())
+    sub_instance_1, _ = Subject.objects.get_or_create(subject=sub1.title())
+    sub_instance_2, _ = Subject.objects.get_or_create(subject=sub2.title())
+    sub_instance_3, _ = Subject.objects.get_or_create(subject=sub3.title())
+    if img is not None:
+        Teacher.objects.create(
+            user=user,
+            phone=phone,
+            subject1=sub_instance_1,
+            subject2=sub_instance_2,
+            subject3=sub_instance_3,
+            experience=exp,
+            gender=gender_instance,
+            teacher_image=img
+        )
+    else:
+        Teacher.objects.create(
+            user=user,
+            phone=phone,
+            subject1=sub_instance_1,
+            subject2=sub_instance_2,
+            subject3=sub_instance_3,
+            experience=exp,
+            gender=gender_instance
+        )
+    return redirect('home')
 
 def register_student(request):
    return render(request,"studentregistration.html")
@@ -64,11 +115,10 @@ def extracted_from_home(fm, data, request):
       messages.error(request, 'Password must be at least 8 characters long.')
    else:
       user = User.objects.create_user(username=name, email=email, password=password)
-      messages.success(request, 'I have taken notice!')
+      # messages.success(request, 'I have taken notice!')
       request.session['reg_type'] = reg_type
       request.session['user_id'] = user.id
       return (
             redirect('/register-teacher/') if reg_type == "Teacher"
             else redirect('/register-student/')
         )
-      return redirect('home')

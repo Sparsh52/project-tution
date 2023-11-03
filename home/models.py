@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.safestring import mark_safe
 # Create your models here.
 
 
@@ -25,9 +26,19 @@ class Teacher(models.Model):
     subject3 = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='teachers_subject3')
     experience = models.IntegerField()
     gender = models.ForeignKey(Gender,on_delete=models.CASCADE)
-    # teacher_image=models.ImageField(upload_to="teacher",blank=True, null=True)
-    # def admin_photo(self):
-    #     return mark_safe(f'<img src="{self.teacher_image.url}" width="100" />')
+    teacher_image=models.ImageField(upload_to="teacher",blank=True, null=True)
+    
+    
+    @property
+    def teacher_photo(self):
+        if self.teacher_image:
+            return mark_safe(f'<img src="{self.teacher_image.url}" width="100" />')
+        default_image = 'default_male_image.jpg' if self.gender.gender == 'Male' else 'default_female_image.png'
+        return mark_safe(f'<img src="/media/teacher/{default_image}" width="100" />')
+
+    
+
+
     def __str__(self):
         return self.user.username
 

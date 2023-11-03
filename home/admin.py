@@ -6,7 +6,7 @@ from django.utils.safestring import mark_safe
 from .models import *
 
 class TeacherAdmin(admin.ModelAdmin):
-    list_display = ['user', 'phone', 'subject1', 'subject2', 'subject3', 'experience', 'gender']
+    list_display = ['user', 'phone', 'subject1', 'subject2', 'subject3', 'experience', 'gender','teacher_photo']
 
 admin.site.register(Teacher, TeacherAdmin)
 admin.site.register(Subject)
