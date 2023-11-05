@@ -10,7 +10,7 @@ from .forms import UserRegistration
 from django.contrib.auth.models import User
 from .models import *
 from django.contrib.auth import login,authenticate,logout
-
+from django.shortcuts import render, get_object_or_404
 def home(request):
    if request.method=="POST":
       username=request.POST.get('username')
@@ -81,7 +81,12 @@ def register_student(request):
 
 
 
-
+def teacher_profile(request, teacher_id):
+    teacher = get_object_or_404(Teacher, id=teacher_id)
+    context = {
+        'teacher': teacher,
+    }
+    return render(request, 'teacher_profile.html', context)
 
 
 

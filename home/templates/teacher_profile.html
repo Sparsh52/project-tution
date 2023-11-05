@@ -1,0 +1,33 @@
+{% extends "base2.html" %}
+
+{% block content %}
+    <div class="container mt-5 rounded shadow-lg text-center fixed-length" >
+        <div class="row">
+            <div class="col-md-4 mx-auto">
+                <!-- Display teacher image -->
+                <img class="img-fluid rounded" src="{{ teacher.teacher_image_url }}" alt="Teacher Image">
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-8 mx-auto">
+                <h1 class="text-center">{{ teacher.user.username|capfirst }}</h1>
+                <p class="text-center">Years of Experience: {{ teacher.experience }} years</p>
+                <p class="text-center">Email: {{ teacher.user.email }}</p>
+                <p class="text-center">Phone: {{ teacher.phone }}</p>
+                <!-- Add more details if necessary -->
+            </div>
+        </div>
+
+        <!-- Add buttons for profile and booking session -->
+        <div class="row mt-3">
+            <div class="col-md-6 mx-auto">
+                <a href="{% url 'teacher_profile' teacher_id=teacher.id %}" class="btn btn-primary btn-block">View Profile</a>
+            </div>
+            <div class="col-md-6 mx-auto">
+                <!-- Add a button for booking session if applicable -->
+                <button class="btn btn-success btn-block">Book Session</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}

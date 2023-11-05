@@ -25,6 +25,7 @@ urlpatterns = [
     path("register/",register,name="register"),
     path("register-teacher/",register_teacher,name="register_teacher"),
     path("register-student/",register_student,name="register_student"),
-    path("teachers-list/",teachers_list,name="teachers_list")
+    path("teachers-list/",teachers_list,name="teachers_list"),
+    path("teacher-profile/<teacher_id>",teacher_profile,name="teacher_profile")
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
