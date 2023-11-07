@@ -1,3 +1,4 @@
+import contextlib
 from django.shortcuts import render
 from django.http import HttpResponse
 from .forms import *
@@ -11,6 +12,7 @@ from django.contrib.auth.models import User
 from .models import *
 from django.contrib.auth import login,authenticate,logout
 from django.shortcuts import render, get_object_or_404
+from django.db.models import Q
 def home(request):
    if request.method=="POST":
       username=request.POST.get('username')
@@ -24,16 +26,38 @@ def home(request):
          return redirect('home')
       else:
          login(request,user)
-         return redirect('/teachers-list/')
+          # Check if the user is a teacher or student
+         with contextlib.suppress(Teacher.DoesNotExist):
+            teacher = Teacher.objects.get(user=user)
+            return HttpResponse('IsTeacher')
+         with contextlib.suppress(Student.DoesNotExist):
+            student = Student.objects.get(user=user)
+            return redirect('/student-profile/')
    return render(request,"login.html")
 
 
+def student_profile(request):
+    student = Student.objects.get(user=request.user)
+    context = {
+        'student': student,
+    }
+    return render(request, 'student_profile.html', context)
 
 def teachers_list(request):
-   queryset=Teacher.objects.all()
-   print(queryset)
+   queryset = Teacher.objects.all()
+   search_query = request.GET.get('search_query')
+   hourly_price = request.GET.get('hourlyPrice')
+   experience = request.GET.get('experience')
+   if search_query := request.GET.get('search_query'):
+      subjects_filter= (Q(subject1__subject__icontains=search_query) | Q(subject2__subject__icontains=search_query) | Q(subject3__subject__icontains=search_query))
+      username_filter=(Q(user__username=search_query))
+      queryset = queryset.filter(subjects_filter|username_filter)
+   if hourly_price:
+      queryset = queryset.filter(hourly_Rate__lte=hourly_price)
+   if experience:
+      queryset = queryset.filter(experience__gte=experience)
    context = {'teachers': queryset}
-   return render(request,"teacherlist.html",context)
+   return render(request, 'teacherlist.html', context)
 
 def register(request):
    fm = UserRegistration()
@@ -120,6 +144,7 @@ def extracted_from_home(fm, data, request):
 
 def extracted_from_register_Teacher(request, user):
     data = request.POST
+    hourly_Rate=data['hourly_rate']
     phone = data['phone']
     sub1 = data['sub1']
     sub2 = data['sub2']
@@ -144,7 +169,8 @@ def extracted_from_register_Teacher(request, user):
             subject3=sub_instance_3,
             experience=exp,
             gender=gender_instance,
-            teacher_image=img
+            teacher_image=img,
+            hourly_Rate=hourly_Rate
         )
     else:
         Teacher.objects.create(
@@ -154,7 +180,8 @@ def extracted_from_register_Teacher(request, user):
             subject2=sub_instance_2,
             subject3=sub_instance_3,
             experience=exp,
-            gender=gender_instance
+            gender=gender_instance,
+            hourly_Rate=hourly_Rate
         )
     return redirect('home')
 
@@ -164,11 +191,26 @@ def extracted_from_register_student(request,user):
    ins_type = request.POST['ins_type']
    standard_or_semester = request.POST.get('standard') or request.POST.get('semester')
    institution_name = request.POST['institution_name']
-   student = Student.objects.create(
+   gender = request.POST['gender']
+   img = request.FILES.get('student_image')
+   gender_instance,_=Gender.objects.get_or_create(gender=gender.title())
+   if img is not None:
+      Student.objects.create(
          user=user,
          phone=phone,
          institution_type=ins_type,
          standard_or_semester=standard_or_semester,
-         institution_name=institution_name 
-   )
-   return redirect('home')
+         institution_name=institution_name,
+         gender=gender_instance,
+         student_image=img
+      )
+   else:
+      Student.objects.create(
+            user=user,
+            phone=phone,
+            institution_type=ins_type,
+            standard_or_semester=standard_or_semester,
+            institution_name=institution_name,
+            gender=gender_instance
+      )
+      return redirect('home')

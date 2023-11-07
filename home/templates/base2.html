@@ -7,13 +7,35 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
 </head>
 <body class="bg-light">
-    <nav class="navbar fixed-top bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/" style="color: white;">Teacher App</a>
-            <div class="col-lg-6 text-right menu-1 collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav">
-                </ul>
+    <nav class="navbar navbar-expand-lg navbar-light bg-dark">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+            <a class="navbar-brand" href="https://hexaviewtech.com/" style="color: white;"><img src="/media/teacher/hexaview_logo.jfif" alt="Logo" height="70"></a>
+            <a class="navbar-brand" style="color: white;"><b><i>Teacher App</i></b></a>
+            <a class="navbar-brand" href="/student-profile/" style="color: white;"><b><i>Student Profile</i></b></a>
+            <a class="navbar-brand" href="/teachers-list/" style="color: white;"><b><i>Teacher List</i></b></a>            
+            <div class="d-flex ms-auto">
+                <form class="form-inline my-2 my-lg-0">
+                    <div class="input-group">
+                        <input class="form-control" type="search" placeholder="Search" aria-label="Search" name="search_query">
+                        <button class="btn btn-success my-2 my-sm-0 ms-2" type="submit">Search</button>
+                    </div>
+                </form>
             </div>
+            
+                <!-- <div class="mx-auto col-6">
+                  <form>
+                   <div class="mb-3">
+                    <label for="exampleInputEmail1" cLass="form-label">Search Food</label>
+                    <input name="search" type="text" class="form-control">
+                    </div>                                                                  
+                  <button type="submit" class="btn btn-primary">Search</button>
+                  </form>
+                </div> -->
+              
+            <a class="navbar-brand btn btn-lg btn-danger ms-auto" href="/">Logout</a>
         </div>
     </nav>
 

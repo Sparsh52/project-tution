@@ -26,8 +26,8 @@ class Teacher(models.Model):
     subject3 = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='teachers_subject3')
     experience = models.IntegerField()
     gender = models.ForeignKey(Gender,on_delete=models.CASCADE)
+    hourly_Rate=models.IntegerField()
     teacher_image=models.ImageField(upload_to="teacher",blank=True, null=True)
-    
     
     @property
     def teacher_photo(self):
@@ -59,5 +59,21 @@ class Student(models.Model):
     institution_type = models.CharField(max_length=10, choices=INSTITUTION_TYPES, blank=False)
     standard_or_semester=models.CharField(max_length=100,blank=False,null=False)
     institution_name=models.CharField(max_length=100,blank=False,null=False)
+    gender = models.ForeignKey(Gender,on_delete=models.CASCADE)
+    student_image=models.ImageField(upload_to="student",blank=True, null=True)
+    
+    @property
+    def student_photo(self):
+        if self.student_image:
+            return mark_safe(f'<img src="{self.student_image.url}" width="100" />')
+        default_image = 'default_male_image.jpg' if self.gender.gender == 'Male' else 'default_female_image.png'
+        return mark_safe(f'<img src="/media/teacher/{default_image}" width="100" />')
+    
+    @property
+    def student_image_url(self):
+        if self.student_image:
+            return self.student_image.url
+        default_image = 'default_male_image.jpg' if self.gender.gender == 'Male' else 'default_female_image.png'
+        return f"/media/teacher/{default_image}"
     def __str__(self):
         return self.user.username
