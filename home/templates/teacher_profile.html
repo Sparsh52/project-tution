@@ -22,11 +22,35 @@
         <!-- Add buttons for profile and booking session -->
         <div class="row mt-3">
             <div class="col-md-6 mx-auto">
-                <a href="{% url 'teacher_profile' teacher_id=teacher.id %}" class="btn btn-primary btn-block">Add Feedback</a>
+                <a href="{% url 'add_feedback' teacher_id=teacher.id %}" class="btn btn-primary btn-block">Add Feedback</a>
             </div>
             <div class="col-md-6 mx-auto">
                 <!-- Add a button for booking session if applicable -->
                 <button class="btn btn-success btn-block">Book Session</button>
+            </div>
+        </div>
+
+        <!-- Display Feedbacks -->
+        <div class="row mt-3">
+            <div class="col-md-8 mx-auto">
+                <h2 class="text-center">Feedbacks</h2>
+                {% if feedbacks %}
+                    {% for feedback in feedbacks %}
+                        <div class="card mt-2">
+                            <div class="card-body">
+                                <p><b>Rating:</b>
+                                    {% for _ in feedback.get_stars %}
+                                        &#9733; <!-- Unicode character for a filled star -->
+                                    {% endfor %}
+                                </p>
+                                <p><b>Comment:</b> {{ feedback.comment }}</p>
+                                <p><b>Student:</b> {{ feedback.student.username }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center">No feedback available.</p>
+                {% endif %}
             </div>
         </div>
     </div>

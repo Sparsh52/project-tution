@@ -11,6 +11,10 @@ class TeacherAdmin(admin.ModelAdmin):
 class StudentAdmin(admin.ModelAdmin):
     list_display = ['user', 'phone', 'institution_type', 'standard_or_semester', 'institution_name','gender','student_photo']
 
+class FeedbackAdmin(admin.ModelAdmin):
+    list_display = ['teacher', 'student', 'rating', 'comment']
+
+admin.site.register(Feedback, FeedbackAdmin)
 admin.site.register(Student,StudentAdmin)
 admin.site.register(Teacher, TeacherAdmin)
 admin.site.register(Subject)

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
+from django.core.validators import MinValueValidator, MaxValueValidator
 # Create your models here.
 
 
@@ -77,3 +78,14 @@ class Student(models.Model):
         return f"/media/teacher/{default_image}"
     def __str__(self):
         return self.user.username
+
+
+class Feedback(models.Model):
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE,related_name="feedbacks")
+    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    comment = models.TextField()
+    def get_stars(self):
+        return range(self.rating)
+    def _str_(self):
+        return f"Feedback for {self.teacher.user.username} by {self.student.username}"

@@ -1,0 +1,29 @@
+{% extends "base2.html" %}
+
+{% block content %}
+    <div class="container mt-5 rounded shadow-lg text-center fixed-length">
+        <div class="row mt-3">
+            <div class="col-md-6 mx-auto">
+                <form method="post" action="{% url 'add_feedback' teacher_id=teacher.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="comment">Comment:</label>
+                        <textarea class="form-control" id="comment" name="comment" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="rating">Rating:</label>
+                        <select class="form-control" id="rating" name="rating" required>
+                            <option value="" selected disabled>Select Rating</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Add Feedback</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

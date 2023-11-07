@@ -35,6 +35,21 @@ def home(request):
             return redirect('/student-profile/')
    return render(request,"login.html")
 
+def add_feedback(request, teacher_id):
+    teacher = get_object_or_404(Teacher, id=teacher_id)
+    if request.method == 'POST':
+        comment = request.POST.get('comment')
+        rating = request.POST.get('rating')
+        feedback = Feedback.objects.create(
+            teacher=teacher,
+            student=request.user,
+            comment=comment,
+            rating=rating
+        )
+        messages.success(request, 'Feedback added successfully!')
+        return redirect('teacher_profile', teacher_id=teacher_id)
+    return render(request, 'add_feedback.html', {'teacher': teacher})
+
 
 def student_profile(request):
     student = Student.objects.get(user=request.user)
@@ -107,8 +122,10 @@ def register_student(request):
 
 def teacher_profile(request, teacher_id):
     teacher = get_object_or_404(Teacher, id=teacher_id)
+    feedbacks = teacher.feedbacks.all()
     context = {
         'teacher': teacher,
+        'feedbacks': feedbacks,
     }
     return render(request, 'teacher_profile.html', context)
 
