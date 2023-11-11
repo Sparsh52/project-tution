@@ -1,23 +1,26 @@
 from datetime import datetime, timedelta
 from calendar import HTMLCalendar
 from .models import Event
+import random
 
 class Calendar(HTMLCalendar):
 	def __init__(self, year=None, month=None):
 		self.year = year
 		self.month = month
 		super(Calendar, self).__init__()
-
 	# formats a day as a td
 	# filter events by day
 	def formatday(self, day, events,user_type):
 		events_per_day = events.filter(start_time__day=day)
 		print(user_type)
+		color_list = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#ff8000", "#0080ff", "#80ff00", "#8000ff", "#ff0080"]
 		try:
 			li = [event.get_available_url(user_type) for event in events_per_day if event.booked_by is None]
+			print(li[0])
 		except Exception as e:
 			print(f"Not Working: {e}")
-		d = ''.join(f'<li>{event}</li>' for event in li)
+		d = ''.join(f'<li style="background-color: {random.choice(color_list)}; padding: 4px; margin: 4px; text-align: center; width: {len(event[1]) * 20}px;">{event[1]} <span style="font-weight: bold; font-style: italic;">[{event[2]}]</span></li>' for event in li)
+		# d = ''.join(f'<li>{event.get_html_url}</li>' for event in events_per_day)
 		if day != 0:
 			return f"<td><span class='date'>{day}</span><ul> {d} </ul></td>"
 		return '<td></td>'

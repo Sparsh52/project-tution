@@ -4,6 +4,7 @@ from django.utils.safestring import mark_safe
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.urls import reverse
 from django.http import HttpResponse
+import random
 # Create your models here.
 
 
@@ -105,13 +106,12 @@ class Event(models.Model):
     @property
     def get_html_url(self):
         url = reverse('event_edit', args=[self.created_by.id,self.id])
-        return f'<a href="{url}"> {self.title} </a>'
-    
+        return f'<a href="{url}"> {self.title} </a>'    
     def get_available_url(self, user_type):
         if user_type != 'student':
             url=reverse('available_slot_teacher')
-            return f'<a href="{url}"> {self.title} </a>'
+            return (f'<a href="{url}" style="color: black;">{self.title}</a>',self.title,self.created_by)
         url = reverse('available_slots_student', args=[self.created_by.id])
-        return f'<a href="{url}"> {self.title} </a>'
+        return (f'<a href="{url}" style="color: black;">{self.title}</a>',self.title,self.created_by)
     
 
