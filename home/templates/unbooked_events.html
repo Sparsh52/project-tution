@@ -1,0 +1,20 @@
+{% extends "base5.html" %}
+{% block content %}
+<div class="col-lg-9 px-4 mb-5 ml-5">
+    {% for event in unbooked_events %}
+        <div class="card mb-4 shadow-lg" style="width: 75rem;">
+            <div class="card-body text-center">
+                <h5 class="card-title">{{ event.title }}</h5>
+                <p class="card-text">
+                    <strong>Date:</strong> {{ event.start_date }}<br>
+                    <strong>Time:</strong> {{ event.start_time|time:"g:i A" }} to {{ event.end_time|time:"g:i A" }}
+                </p>
+                <a href="{% url 'delete_event' event.id %}" class="btn btn-danger">Delete Slot</a>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+</div>
+</div>
+</section>
+{% endblock %}

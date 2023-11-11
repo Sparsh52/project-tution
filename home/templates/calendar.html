@@ -1,0 +1,29 @@
+{% extends 'base4.html' %}
+
+{% block title %}
+Calendar
+{% endblock %}
+
+{% block content %}
+<div class="clearfix">
+    {% if user_type == 'student' %}
+    <a class="btn btn-info left" href="{% url 'registered_teachers_list' %}"> Back </a>
+    {% endif %}
+    {% if user_type == 'teacher' %}
+    <a class="btn btn-info left" href="{% url 'teacher_profile_teacher' %}"> Back </a>
+    {% endif %}
+    <a class="btn btn-info left" href="{% url 'book_session' teacher_id=teacher.id %}?{{ prev_month }}"> Previous Month </a>
+    <a class="btn btn-info right" href="{% url 'book_session' teacher_id=teacher.id %}?{{ next_month }}"> Next Month </a>
+    {% if user_type == 'student' %}
+    <a class="btn btn-info right" href="{% url 'available_slots_student' teacher_id=teacher.id%}"> Available Slots </a>
+    {% endif %}
+    {% if user_type == 'teacher' %}
+        <a class="btn btn-info right" href="{% url 'event_new' teacher_id=teacher.id%}"> New Event </a>
+    {% endif %}
+</div>
+
+{{ calendar }}
+
+
+
+{% endblock %}

@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.urls import reverse
+from django.http import HttpResponse
 # Create your models here.
 
 
@@ -29,6 +31,8 @@ class Teacher(models.Model):
     gender = models.ForeignKey(Gender,on_delete=models.CASCADE)
     hourly_Rate=models.IntegerField()
     teacher_image=models.ImageField(upload_to="teacher",blank=True, null=True)
+    registered_students = models.ManyToManyField('Student', related_name='teachers', blank=True)
+
     
     @property
     def teacher_photo(self):
@@ -89,3 +93,25 @@ class Feedback(models.Model):
         return range(self.rating)
     def _str_(self):
         return f"Feedback for {self.teacher.user.username} by {self.student.username}"
+
+class Event(models.Model):
+    created_by=models.ForeignKey(Teacher,on_delete=models.CASCADE)
+    booked_by=models.ForeignKey(Student,on_delete=models.CASCADE,blank=True,null=True)
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+
+    @property
+    def get_html_url(self):
+        url = reverse('event_edit', args=[self.created_by.id,self.id])
+        return f'<a href="{url}"> {self.title} </a>'
+    
+    def get_available_url(self, user_type):
+        if user_type != 'student':
+            url=reverse('available_slot_teacher')
+            return f'<a href="{url}"> {self.title} </a>'
+        url = reverse('available_slots_student', args=[self.created_by.id])
+        return f'<a href="{url}"> {self.title} </a>'
+    
+

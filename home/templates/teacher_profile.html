@@ -20,17 +20,23 @@
         </div>
 
         <!-- Add buttons for profile and booking session -->
+        {% if teacher in  student.teachers.all %}
         <div class="row mt-3">
             <div class="col-md-6 mx-auto">
                 <a href="{% url 'add_feedback' teacher_id=teacher.id %}" class="btn btn-primary btn-block">Add Feedback</a>
             </div>
-            <div class="col-md-6 mx-auto">
-                <!-- Add a button for booking session if applicable -->
-                <button class="btn btn-success btn-block">Book Session</button>
+            <div class="col-md-6 mx-auto text-center">
+                <!-- Add a button for booking session if applicable
+                <button class="btn btn-success btn-block">Book Session</button> -->
+                <a href="{% url 'book_session' teacher_id=teacher.id %}" class="btn btn-success">Book Session</a>
+                
             </div>
         </div>
-
+        {% else %}
+        <a href="{% url 'register_under_teacher' teacher_id=teacher.id %}" class="btn btn-success btn-sm">Register</a>
+        {% endif %}
         <!-- Display Feedbacks -->
+        {% if teacher in  student.teachers.all %}
         <div class="row mt-3">
             <div class="col-md-8 mx-auto">
                 <h2 class="text-center">Feedbacks</h2>
@@ -40,7 +46,7 @@
                             <div class="card-body">
                                 <p><b>Rating:</b>
                                     {% for _ in feedback.get_stars %}
-                                        &#9733; <!-- Unicode character for a filled star -->
+                                        &#9733;  
                                     {% endfor %}
                                 </p>
                                 <p><b>Comment:</b> {{ feedback.comment }}</p>
@@ -53,5 +59,6 @@
                 {% endif %}
             </div>
         </div>
+    {% endif %}
     </div>
 {% endblock %}

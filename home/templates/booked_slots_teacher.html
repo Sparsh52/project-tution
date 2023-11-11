@@ -1,0 +1,16 @@
+{% extends "base5.html" %}
+{% load static %}
+{% block content %}
+<div class="col-lg-9 px-4 mb-5 ml-5">
+    {% for event in events %}
+        <div class="card mb-4 shadow-lg" style="width: 75rem;">
+            <div class="card-body slot-details text-center">
+                <h5 class="card-title"><b><i>{{ event.title }}</i></b></h5>
+                <p class="card-text"><b><i>Start Time:</i></b> {{ event.start_time|date:"F d, Y" }} {{ event.start_time|time:"g:i A" }}</p>
+                <p class="card-text"><b><i>End Time:</i></b> {{ event.end_time|date:"F d, Y" }} {{ event.end_time|time:"g:i A" }}</p>
+                <a href="{% if event.created_by %}/event-edit/{{ event.created_by.id }}/{{ event.id }}{% endif %}" class="btn btn-primary">Check Slots</a>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

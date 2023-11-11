@@ -13,6 +13,11 @@ from .models import *
 from django.contrib.auth import login,authenticate,logout
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
+from .utils import Calendar
+from datetime import datetime, timedelta, date
+import calendar
+from django.urls import reverse
+
 def home(request):
    if request.method=="POST":
       username=request.POST.get('username')
@@ -29,11 +34,27 @@ def home(request):
           # Check if the user is a teacher or student
          with contextlib.suppress(Teacher.DoesNotExist):
             teacher = Teacher.objects.get(user=user)
-            return HttpResponse('IsTeacher')
+            return redirect('/teacher-profile-teacher/')
          with contextlib.suppress(Student.DoesNotExist):
             student = Student.objects.get(user=user)
             return redirect('/student-profile/')
    return render(request,"login.html")
+
+
+
+
+def teacher_profile_teacher(request):
+   teacher = get_object_or_404(Teacher, user=request.user)
+   return render(request, 'teacher_profile_teacher.html', {'teacher': teacher})
+
+def registered_students_teacher(request):
+    teacher = get_object_or_404(Teacher, user=request.user)
+    students = teacher.registered_students.all()
+    return render(request, 'registered_students.html', {'students': students, 'teacher': teacher})
+
+def student_profile_teacher(request,student_id):
+   student=Student.objects.get(id=student_id)
+   return render(request,'student_profile_teacher.html',{'student':student})
 
 def add_feedback(request, teacher_id):
     teacher = get_object_or_404(Teacher, id=teacher_id)
@@ -59,14 +80,18 @@ def student_profile(request):
     return render(request, 'student_profile.html', context)
 
 def teachers_list(request):
-   queryset = Teacher.objects.all()
+   student = Student.objects.get(user=request.user)
+   registered_teachers_ids = student.teachers.values_list('id', flat=True)
+   queryset = Teacher.objects.exclude(id__in=registered_teachers_ids)
    search_query = request.GET.get('search_query')
    hourly_price = request.GET.get('hourlyPrice')
    experience = request.GET.get('experience')
-   if search_query := request.GET.get('search_query'):
-      subjects_filter= (Q(subject1__subject__icontains=search_query) | Q(subject2__subject__icontains=search_query) | Q(subject3__subject__icontains=search_query))
-      username_filter=(Q(user__username=search_query))
-      queryset = queryset.filter(subjects_filter|username_filter)
+   if search_query:
+      subjects_filter = (Q(subject1_subject_icontains=search_query) | 
+                           Q(subject2_subject_icontains=search_query) | 
+                           Q(subject3_subject_icontains=search_query))
+      username_filter = Q(user__username=search_query)
+      queryset = queryset.filter(subjects_filter | username_filter)
    if hourly_price:
       queryset = queryset.filter(hourly_Rate__lte=hourly_price)
    if experience:
@@ -80,7 +105,10 @@ def register(request):
       fm = UserRegistration(request.POST)
       data = request.POST
       if fm.is_valid():
-         return extracted_from_home(fm, data, request)
+         try:
+            return extracted_from_home(fm, data, request)
+         except Exception as e:
+            print("Something Wrong happend",e)
       for field, errors in fm.errors.items():
          for error in errors:
             messages.error(request, f"{field}: {error}")
@@ -121,11 +149,13 @@ def register_student(request):
 
 
 def teacher_profile(request, teacher_id):
+    student = Student.objects.get(user=request.user)
     teacher = get_object_or_404(Teacher, id=teacher_id)
     feedbacks = teacher.feedbacks.all()
     context = {
         'teacher': teacher,
         'feedbacks': feedbacks,
+        'student':student
     }
     return render(request, 'teacher_profile.html', context)
 
@@ -231,3 +261,107 @@ def extracted_from_register_student(request,user):
             gender=gender_instance
       )
       return redirect('home')
+
+def book_session(request,teacher_id):
+   try:
+      student = Student.objects.get(user=request.user)
+      user_type = "student"
+   except Student.DoesNotExist:
+      user_type = "teacher"
+   teacher = get_object_or_404(Teacher, id=teacher_id)
+   month_param = request.GET.get('month', None)
+   d = get_date(month_param)
+   cal = Calendar(d.year, d.month)
+   html_cal = cal.formatmonth(user_type,withyear=True)
+   context = {
+        'calendar': mark_safe(html_cal),
+        'prev_month': prev_month(d),
+        'next_month': next_month(d),
+        'teacher':teacher,
+        'user_type':user_type
+    }
+   print(teacher)
+   return render(request, 'calendar.html', context)
+
+
+def prev_month(d):
+    first = d.replace(day=1)
+    prev_month = first - timedelta(days=1)
+    month = f'month={str(prev_month.year)}-{str(prev_month.month)}'
+    return month
+
+def next_month(d):
+    days_in_month = calendar.monthrange(d.year, d.month)[1]
+    last = d.replace(day=days_in_month)
+    next_month = last + timedelta(days=1)
+    month = f'month={str(next_month.year)}-{str(next_month.month)}'
+    return month
+
+def get_date(req_month):
+    if req_month:
+        year, month = (int(x) for x in req_month.split('-'))
+        return date(year, month, day=1)
+    return datetime.now()
+
+def register_under_teacher(request,teacher_id):
+   teacher=get_object_or_404(Teacher, id=teacher_id)
+   student = Student.objects.get(user=request.user)
+   teacher.registered_students.add(student)
+   return redirect('/registered-teachers-list/')
+
+
+def registered_teachers_list(request):
+   student = Student.objects.get(user=request.user)
+   queryset = student.teachers.all()
+   context = {'teachers': queryset}
+   return render(request, 'teacher_registered_list.html', context)
+
+def event(request, teacher_id, event_id=None):
+    teacher = get_object_or_404(Teacher, id=teacher_id)
+    instance = get_object_or_404(Event, pk=event_id) if event_id else Event()
+    try:
+        student = Student.objects.get(user=request.user)
+        user_type = "student"
+    except Student.DoesNotExist:
+        user_type = "teacher"
+    form = EventForm(user_type, request.POST or None, instance=instance)
+    if request.POST and form.is_valid():
+        form.save()
+        return redirect(reverse('book_session', kwargs={'teacher_id': teacher.id}))
+    if event_id is None:
+        return render(request, 'event.html', {'form': form, 'teacher': teacher,'user_type':user_type})
+    return render(request, 'event.html', {'form': form, 'instance': instance, 'teacher': teacher,'user_type':user_type})
+
+
+def available_slots_student(request, teacher_id):
+    teacher=get_object_or_404(Teacher,id=teacher_id)  
+    teacher_events = Event.objects.filter(created_by__id=teacher_id, booked_by__isnull=True)
+    return render(request, 'available_slots.html', {'teacher_events': teacher_events,'teacher':teacher})
+
+
+def booked_slots_students(request):
+   student = Student.objects.get(user=request.user)
+   booked_events = Event.objects.filter(booked_by_id=student.id)
+   context = {
+        'booked_events': booked_events,
+    }
+   return render(request, 'booked_slots.html', context)
+
+
+def available_slot_teacher(request):
+   teacher=Teacher.objects.get(user=request.user)
+   unbooked_events=Event.objects.filter(created_by=teacher, booked_by__isnull=True)
+   return render(request, 'unbooked_events.html', {'teacher': teacher, 'unbooked_events': unbooked_events})
+
+def booked_slots_teacher(request):
+    teacher = get_object_or_404(Teacher, user=request.user)
+    events = Event.objects.filter(created_by=teacher, booked_by__isnull=False)
+    return render(request, 'booked_slots_teacher.html', {'events': events, 'teacher': teacher})
+
+def delete_event(request, event_id):
+   event = get_object_or_404(Event, id=event_id)
+   if request.method == 'POST':
+      event.delete()
+      return redirect('/teacher-profile-teacher/')
+   context = {'event': event}
+   return render(request, 'delete_event.html', context)

@@ -7,17 +7,18 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
 </head>
 <body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-light bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-light bg-primary">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
             <a class="navbar-brand" href="https://hexaviewtech.com/" style="color: white;"><img src="/media/teacher/hexaview_logo.jfif" alt="Logo" height="70"></a>
             <a class="navbar-brand" style="color: white;"><b><i>Teacher App</i></b></a>
-            <a class="navbar-brand" href="/student-profile/" style="color: white;"><b><i>Student Profile</i></b></a>
-            <a class="navbar-brand" href="/teachers-list/" style="color: white;"><b><i>Teacher List</i></b></a>
-            <a class="navbar-brand" href="/registered-teachers-list/" style="color: white;"><b><i> Registered Teacher List</i></b></a>
-            <a class="navbar-brand" href="/booked-slots-students/" style="color: white;"><b><i>Booked Slots</i></b></a>                
+            <a class="navbar-brand" href="/teacher-profile-teacher/" style="color: white;"><b><i>Teacher Profile</i></b></a>
+            <a class="navbar-brand" href="/registered-students/" style="color: white;"><b><i> Student List</i></b></a>
+            <a class="navbar-brand" href="/event/new/{{ teacher.id }}" style="color: white;"><b><i>Create Event</i></b></a>
+            <a class="navbar-brand" href="/booked-slots-teacher/" style="color: white;"><b><i>Booked Slots</i></b></a>
+            <a class="navbar-brand" href="/available-slot-teacher/" style="color: white;"><b><i>UnBooked Slots</i></b></a>                   
             <div class="d-flex ms-auto">
                 <form class="form-inline my-2 my-lg-0">
                     <div class="input-group">
@@ -26,16 +27,6 @@
                     </div>
                 </form>
             </div>
-            
-                <!-- <div class="mx-auto col-6">
-                  <form>
-                   <div class="mb-3">
-                    <label for="exampleInputEmail1" cLass="form-label">Search Food</label>
-                    <input name="search" type="text" class="form-control">
-                    </div>                                                                  
-                  <button type="submit" class="btn btn-primary">Search</button>
-                  </form>
-                </div> -->
               
             <a class="navbar-brand btn btn-lg btn-danger ms-auto" href="/">Logout</a>
         </div>
