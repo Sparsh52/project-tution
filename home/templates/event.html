@@ -9,8 +9,11 @@ Event
   {% if user_type == 'student' %}
     <a class="btn btn-info left" href="{% url 'book_session' teacher_id=teacher.id %}"> Calendar </a>
   {% endif %}
+
+ {% if user_type == 'teacher' %}
   {% if instance is not None %}
    <a class="btn btn-info right" href="/delete-event/{{instance.id}}">Delete</a>
+    {% endif %}
   {% endif %}
 </div>
 {% if form.errors %}
@@ -32,7 +35,9 @@ Event
   {% csrf_token %}
   <table class="form form-table">
     {{ form }}
+    {% if instance.created_by is None or instance.booked_by is None %}
     <tr><td colspan="2"><button type="submit" class="btn btn-info right"> Submit </button></td></tr>
+    {% endif %}
   </table>
 </form>
 {% endblock %}

@@ -3,7 +3,7 @@ from django.urls import path, include
 from home.views import *
 from django.conf import settings
 from django.conf.urls.static import static
-
+from django.contrib.auth.views import LogoutView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,6 +29,8 @@ urlpatterns = [
     path('available-slot-teacher/',available_slot_teacher,name='available_slot_teacher'),
     path('booked-slots-teacher/',booked_slots_teacher,name='booked_slots_teacher'),
     path('delete-event/<int:event_id>/',delete_event, name='delete_event'),
+    # path('logout/',LogoutView.as_view(next_page="/"), name='logout'),
+    path('logout/',logout_page, name='logout'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

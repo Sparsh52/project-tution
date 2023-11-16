@@ -17,45 +17,76 @@ from .utils import Calendar
 from datetime import datetime, timedelta, date
 import calendar
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
 
+@never_cache
 def home(request):
-   if request.method=="POST":
-      username=request.POST.get('username')
-      password=request.POST.get('password')
-      if not User.objects.filter(username=username).exists():
-         messages.error(request, 'Invalid Username')
-         return redirect("/register/")
-      user = authenticate(username = username,password = password)
-      if user is None:
-         messages.error(request, 'Invalid Password')
-         return redirect('home')
-      else:
-         login(request,user)
-          # Check if the user is a teacher or student
-         with contextlib.suppress(Teacher.DoesNotExist):
-            teacher = Teacher.objects.get(user=user)
+    # Check if the user is already authenticated
+    if request.user.is_authenticated:
+        try:
+            # Attempt to get the Teacher profile
+            teacher = Teacher.objects.get(user=request.user)
             return redirect('/teacher-profile-teacher/')
-         with contextlib.suppress(Student.DoesNotExist):
-            student = Student.objects.get(user=user)
-            return redirect('/student-profile/')
-   return render(request,"login.html")
+        except Teacher.DoesNotExist:
+            try:
+                # Attempt to get the Student profile
+                student = Student.objects.get(user=request.user)
+                return redirect('/student-profile/')
+            except Student.DoesNotExist:
+                # Handle the case where the user is authenticated but not a Teacher or Student
+                messages.error(request, 'Invalid user type')
+                return redirect('home')
+
+    # Handle POST requests for login
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        if not User.objects.filter(username=username).exists():
+            messages.error(request, 'Invalid Username')
+            return redirect("/register/")
+        user = authenticate(username=username, password=password)
+        if user is None:
+            messages.error(request, 'Invalid Password')
+            return redirect('home')
+        else:
+            login(request, user)
+            try:
+                teacher = Teacher.objects.get(user=user)
+                return redirect('/teacher-profile-teacher/')
+            except Teacher.DoesNotExist:
+                try:
+                    student = Student.objects.get(user=user)
+                    return redirect('/student-profile/')
+                except Student.DoesNotExist:
+                    messages.error(request, 'Invalid user type')
+                    return redirect('home')
+    return render(request, "login.html")
 
 
-
-
+@never_cache
+@login_required(login_url='home')
 def teacher_profile_teacher(request):
    teacher = get_object_or_404(Teacher, user=request.user)
    return render(request, 'teacher_profile_teacher.html', {'teacher': teacher})
 
+@never_cache
+@login_required(login_url='home')
 def registered_students_teacher(request):
     teacher = get_object_or_404(Teacher, user=request.user)
     students = teacher.registered_students.all()
     return render(request, 'registered_students.html', {'students': students, 'teacher': teacher})
 
+
+@never_cache
+@login_required(login_url='home')
 def student_profile_teacher(request,student_id):
    student=Student.objects.get(id=student_id)
    return render(request,'student_profile_teacher.html',{'student':student})
 
+
+@never_cache
+@login_required(login_url='home')
 def add_feedback(request, teacher_id):
     teacher = get_object_or_404(Teacher, id=teacher_id)
     if request.method == 'POST':
@@ -72,6 +103,8 @@ def add_feedback(request, teacher_id):
     return render(request, 'add_feedback.html', {'teacher': teacher})
 
 
+@never_cache
+@login_required(login_url='home')
 def student_profile(request):
     student = Student.objects.get(user=request.user)
     context = {
@@ -79,6 +112,9 @@ def student_profile(request):
     }
     return render(request, 'student_profile.html', context)
 
+
+@never_cache
+@login_required(login_url='home')
 def teachers_list(request):
    student = Student.objects.get(user=request.user)
    registered_teachers_ids = student.teachers.values_list('id', flat=True)
@@ -87,9 +123,9 @@ def teachers_list(request):
    hourly_price = request.GET.get('hourlyPrice')
    experience = request.GET.get('experience')
    if search_query:
-      subjects_filter = (Q(subject1_subject_icontains=search_query) | 
-                           Q(subject2_subject_icontains=search_query) | 
-                           Q(subject3_subject_icontains=search_query))
+      subjects_filter = (Q(subject1__subject__icontains=search_query) | 
+                           Q(subject2__subject__icontains=search_query) | 
+                           Q(subject3__subject__icontains=search_query))
       username_filter = Q(user__username=search_query)
       queryset = queryset.filter(subjects_filter | username_filter)
    if hourly_price:
@@ -99,6 +135,7 @@ def teachers_list(request):
    context = {'teachers': queryset}
    return render(request, 'teacherlist.html', context)
 
+@never_cache
 def register(request):
    fm = UserRegistration()
    if request.method == 'POST':
@@ -123,6 +160,7 @@ def register(request):
 #     recipient_list = [email]
 #     send_mail(subject, message, email_from, recipient_list)
 
+@never_cache
 def register_teacher(request):
     reg_type = request.session.get('reg_type')
     user_id = request.session.get('user_id')
@@ -134,7 +172,7 @@ def register_teacher(request):
       return extracted_from_register_Teacher(request, user)
     return render(request, 'teacherregistration.html')
 
-
+@never_cache
 def register_student(request):
    reg_type = request.session.get('reg_type')
    user_id = request.session.get('user_id')
@@ -146,8 +184,8 @@ def register_student(request):
       return extracted_from_register_student(request,user)
    return render(request,"studentregistration.html")
 
-
-
+@never_cache
+@login_required(login_url='home')
 def teacher_profile(request, teacher_id):
     student = Student.objects.get(user=request.user)
     teacher = get_object_or_404(Teacher, id=teacher_id)
@@ -232,7 +270,7 @@ def extracted_from_register_Teacher(request, user):
         )
     return redirect('home')
 
-
+@never_cache
 def extracted_from_register_student(request,user):
    phone = request.POST['phone']
    ins_type = request.POST['ins_type']
@@ -261,7 +299,9 @@ def extracted_from_register_student(request,user):
             gender=gender_instance
       )
       return redirect('home')
-
+   
+@never_cache
+@login_required(login_url='home')
 def book_session(request,teacher_id):
    try:
       student = Student.objects.get(user=request.user)
@@ -303,28 +343,40 @@ def get_date(req_month):
         return date(year, month, day=1)
     return datetime.now()
 
+@never_cache
+@login_required(login_url='home')
 def register_under_teacher(request,teacher_id):
    teacher=get_object_or_404(Teacher, id=teacher_id)
    student = Student.objects.get(user=request.user)
    teacher.registered_students.add(student)
    return redirect('/registered-teachers-list/')
 
-
+@never_cache
+@login_required(login_url='home')
 def registered_teachers_list(request):
    student = Student.objects.get(user=request.user)
    queryset = student.teachers.all()
    context = {'teachers': queryset}
    return render(request, 'teacher_registered_list.html', context)
 
+
+@never_cache
+@login_required(login_url='home')
 def event(request, teacher_id, event_id=None):
     teacher = get_object_or_404(Teacher, id=teacher_id)
     instance = get_object_or_404(Event, pk=event_id) if event_id else Event()
+    student=None
     try:
         student = Student.objects.get(user=request.user)
         user_type = "student"
     except Student.DoesNotExist:
         user_type = "teacher"
-    form = EventForm(user_type, request.POST or None, instance=instance)
+    if student is None:
+       form = EventForm(request,user_type,data=request.POST or None, instance=instance,initial={'created_by':teacher})
+    else:
+       print(student)
+       form = EventForm(request,user_type,data=request.POST or None, instance=instance,initial={'booked_by':student})
+   #  form = EventForm(requestuser_type,data=request.POST or None, instance=instance,initial={'created_by':teacher})
     if request.POST and form.is_valid():
         form.save()
         return redirect(reverse('book_session', kwargs={'teacher_id': teacher.id}))
@@ -332,13 +384,15 @@ def event(request, teacher_id, event_id=None):
         return render(request, 'event.html', {'form': form, 'teacher': teacher,'user_type':user_type})
     return render(request, 'event.html', {'form': form, 'instance': instance, 'teacher': teacher,'user_type':user_type})
 
-
+@never_cache
+@login_required(login_url='home')
 def available_slots_student(request, teacher_id):
     teacher=get_object_or_404(Teacher,id=teacher_id)  
     teacher_events = Event.objects.filter(created_by__id=teacher_id, booked_by__isnull=True)
     return render(request, 'available_slots.html', {'teacher_events': teacher_events,'teacher':teacher})
 
-
+@never_cache
+@login_required(login_url='home')
 def booked_slots_students(request):
    student = Student.objects.get(user=request.user)
    booked_events = Event.objects.filter(booked_by_id=student.id)
@@ -346,18 +400,22 @@ def booked_slots_students(request):
         'booked_events': booked_events,
     }
    return render(request, 'booked_slots.html', context)
-
-
+@never_cache
+@login_required(login_url='home')
 def available_slot_teacher(request):
    teacher=Teacher.objects.get(user=request.user)
    unbooked_events=Event.objects.filter(created_by=teacher, booked_by__isnull=True)
    return render(request, 'unbooked_events.html', {'teacher': teacher, 'unbooked_events': unbooked_events})
 
+@never_cache
+@login_required(login_url='home')
 def booked_slots_teacher(request):
     teacher = get_object_or_404(Teacher, user=request.user)
     events = Event.objects.filter(created_by=teacher, booked_by__isnull=False)
     return render(request, 'booked_slots_teacher.html', {'events': events, 'teacher': teacher})
 
+@never_cache
+@login_required(login_url='home')
 def delete_event(request, event_id):
    event = get_object_or_404(Event, id=event_id)
    if request.method == 'POST':
@@ -365,3 +423,8 @@ def delete_event(request, event_id):
       return redirect('/teacher-profile-teacher/')
    context = {'event': event}
    return render(request, 'delete_event.html', context)
+
+@never_cache
+def logout_page(request):
+   logout(request)
+   return redirect('home')
