@@ -7,7 +7,7 @@ Event
 {% block content %}
 <div class="clearfix">
   {% if user_type == 'student' %}
-    <a class="btn btn-info left" href="{% url 'book_session' teacher_id=teacher.id %}"> Calendar </a>
+  <a class="btn btn-info left" href="{% url 'book_session' teacher_id=teacher.id %}"> Calendar </a>
   {% endif %}
 
  {% if user_type == 'teacher' %}

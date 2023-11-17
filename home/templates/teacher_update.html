@@ -1,0 +1,47 @@
+{% extends "base5.html" %}
+
+{% block content %}
+    <div class="container mt-5">
+        <form class="col-6 mx-auto card p-3 shadow-lg" action="{% url 'teacher_update' teacher_id=teacher.id  %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" name="phone" id="exampleInputEmail1" aria-describedby="emailHelp">
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputPassword1" class="form-label">Subject-1</label>
+                    <input type="text" class="form-control" name="sub1" id="exampleInputPassword1">
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputPassword1" class="form-label">Subject-2</label>
+                    <input type="text" class="form-control" name="sub2" id="exampleInputPassword1">
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputPassword1" class="form-label">Subject-3</label>
+                    <input type="text" class="form-control" name="sub3" id="exampleInputPassword1">
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputPassword1" class="form-label">Experience</label>
+                    <input type="number" class="form-control" name="exp" id="exampleInputPassword1">
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputPassword1" class="form-label">Hourly_rate</label>
+                    <input type="number" class="form-control" name="hourly_rate" id="exampleInputPassword1">
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Teacher Image</label>
+                    <input type='file' name="teacher_image" class="form-control">
+                </div>
+                <label for="exampleDataList" class="form-label">Gender</label>
+                <select class="form-control" id="id_gender_type" name="gender">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            <div class="form-group">
+                <input class="btn btn-danger btn-lg btn-block" type="submit" value="Submit">
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

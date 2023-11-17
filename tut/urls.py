@@ -22,6 +22,7 @@ urlpatterns = [
     path('event-edit/<teacher_id>/<int:event_id>',event,name='event_edit'),
     path('available-slot-student/<teacher_id>/',available_slots_student,name='available_slots_student'),
     path('booked-slots-students/',booked_slots_students,name="booked_slots_students"),
+     path('update-student/<int:student_id>/', update_student, name='student_update'),
     #Teacher-related-shit
     path('teacher-profile-teacher/',teacher_profile_teacher,name='teacher_profile_teacher'),
     path('registered-students/',registered_students_teacher,name='registered_students_teacher'),
@@ -29,6 +30,7 @@ urlpatterns = [
     path('available-slot-teacher/',available_slot_teacher,name='available_slot_teacher'),
     path('booked-slots-teacher/',booked_slots_teacher,name='booked_slots_teacher'),
     path('delete-event/<int:event_id>/',delete_event, name='delete_event'),
+    path('update-teacher/<teacher_id>',update_teacher,name="teacher_update"),
     # path('logout/',LogoutView.as_view(next_page="/"), name='logout'),
     path('logout/',logout_page, name='logout'),
 

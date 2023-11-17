@@ -19,6 +19,8 @@ import calendar
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
+from django.http import HttpResponseForbidden
+
 
 @never_cache
 def home(request):
@@ -126,7 +128,7 @@ def teachers_list(request):
       subjects_filter = (Q(subject1__subject__icontains=search_query) | 
                            Q(subject2__subject__icontains=search_query) | 
                            Q(subject3__subject__icontains=search_query))
-      username_filter = Q(user__username=search_query)
+      username_filter = Q(user__username__icontains=search_query)
       queryset = queryset.filter(subjects_filter | username_filter)
    if hourly_price:
       queryset = queryset.filter(hourly_Rate__lte=hourly_price)
@@ -354,10 +356,16 @@ def register_under_teacher(request,teacher_id):
 @never_cache
 @login_required(login_url='home')
 def registered_teachers_list(request):
-   student = Student.objects.get(user=request.user)
-   queryset = student.teachers.all()
-   context = {'teachers': queryset}
-   return render(request, 'teacher_registered_list.html', context)
+    student = Student.objects.get(user=request.user)
+    queryset = student.teachers.all()
+    if search_query := request.GET.get('search_query'):
+        subjects_filter = (Q(subject1__subject__icontains=search_query) | 
+                               Q(subject2__subject__icontains=search_query) | 
+                               Q(subject3__subject__icontains=search_query))
+        username_filter = Q(user__username__icontains=search_query)
+        queryset = queryset.filter(subjects_filter | username_filter)
+    context = {'teachers': queryset}
+    return render(request, 'teacher_registered_list.html', context)
 
 
 @never_cache
@@ -371,6 +379,8 @@ def event(request, teacher_id, event_id=None):
         user_type = "student"
     except Student.DoesNotExist:
         user_type = "teacher"
+        if request.user != teacher.user:
+           return HttpResponseForbidden("Fuck off!")
     if student is None:
        form = EventForm(request,user_type,data=request.POST or None, instance=instance,initial={'created_by':teacher})
     else:
@@ -387,9 +397,14 @@ def event(request, teacher_id, event_id=None):
 @never_cache
 @login_required(login_url='home')
 def available_slots_student(request, teacher_id):
-    teacher=get_object_or_404(Teacher,id=teacher_id)  
+    teacher=get_object_or_404(Teacher,id=teacher_id)
     teacher_events = Event.objects.filter(created_by__id=teacher_id, booked_by__isnull=True)
+    if request.method=="POST":
+        selected_date = request.POST.get('selectedDate')
+        date_filter = Q(start_time__icontains=selected_date)
+        teacher_events = teacher_events.filter(date_filter)
     return render(request, 'available_slots.html', {'teacher_events': teacher_events,'teacher':teacher})
+
 
 @never_cache
 @login_required(login_url='home')
@@ -428,3 +443,59 @@ def delete_event(request, event_id):
 def logout_page(request):
    logout(request)
    return redirect('home')
+
+@never_cache
+@login_required(login_url='home')
+def update_student(request, student_id):
+    student = Student.objects.get(id=student_id)
+    if request.method == "POST":
+        student.phone = request.POST['phone']
+        student.institution_type = request.POST['ins_type']
+        student.standard_or_semester = request.POST.get('standard') or request.POST.get('semester')
+        student.institution_name = request.POST['institution_name']
+        gender = request.POST['gender']
+        img = request.FILES.get('student_image')
+        if img is not None:
+            print('yay!')
+            student.student_image=img
+        else:
+            print('Nay')
+        student.gender_instance, _ = Gender.objects.get_or_create(gender=gender.title())
+        student.save()
+        return redirect('/student-profile/')
+    return render(request, 'student_update.html', {'student': student})
+
+@never_cache
+@login_required(login_url='home')
+def update_teacher(request, teacher_id):
+    teacher = Teacher.objects.get(id=teacher_id)
+    if request.method == "POST":
+       data = request.POST
+       hourly_Rate=data['hourly_rate']
+       phone = data['phone']
+       sub1 = data['sub1']
+       sub2 = data['sub2']
+       sub3 = data['sub3']
+       exp = data['exp']
+       gender = data['gender']
+       img = request.FILES.get('teacher_image')
+       if img is not None:
+          teacher.teacher_image=img
+          print('Yeah!')
+       else:
+          print('Nah man!')
+       gender_instance,_=Gender.objects.get_or_create(gender=gender.title())
+       sub_instance_1, _ = Subject.objects.get_or_create(subject=sub1.title())
+       sub_instance_2, _ = Subject.objects.get_or_create(subject=sub2.title())
+       sub_instance_3, _ = Subject.objects.get_or_create(subject=sub3.title())
+       teacher.hourly_Rate=hourly_Rate
+       teacher.phone=phone
+       teacher.subject1 = sub_instance_1
+       teacher.subject2 = sub_instance_2
+       teacher.subject3 = sub_instance_3
+       teacher.experience=exp
+       teacher.gender = gender_instance
+       teacher.hourly_Rate=hourly_Rate
+       teacher.save()
+       return redirect('/teacher-profile-teacher/')
+    return render(request, 'teacher_update.html', {'teacher': teacher})

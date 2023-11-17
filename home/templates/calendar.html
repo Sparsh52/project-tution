@@ -18,7 +18,7 @@ Calendar
     <a class="btn btn-info right" href="{% url 'available_slots_student' teacher_id=teacher.id%}"> Available Slots </a>
     {% endif %}
     {% if user_type == 'teacher' %}
-        <a class="btn btn-info right" href="{% url 'event_new' teacher_id=teacher.id%}"> New Event </a>
+    <a class="btn btn-info right" href="{% url 'event_new' teacher_id=teacher.id%}"> New Event </a>
     {% endif %}
 </div>
 
