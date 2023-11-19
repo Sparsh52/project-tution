@@ -1,20 +1,28 @@
 {% extends "base5.html" %}
 
 {% block content %}
-    <div class="container mt-5 rounded shadow-lg text-center fixed-length" >
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+    </style>
+
+    <div class="container mt-5 rounded shadow-lg text-center fixed-length">
         <div class="row">
             <div class="col-md-4 mx-auto mt-3">
-                <img class="img-fluid rounded" src="{{ teacher.teacher_image_url }}" alt="Teacher Image" height="180vh" width="180vw">
+                <img class="img-fluid rounded" src="{{ teacher.teacher_image_url }}" alt="Teacher Image" height="150" width="150">
             </div>
         </div>
         <div class="row mt-3">
             <div class="col-md-5 mx-auto card shadow-lg">
-                <h1 class="text-center">{{teacher.user.username|capfirst}}</h1>
-                <p class="text-center"><b><i>Years of Experience: {{ teacher.experience }} years</b></i></p>
-                <p class="text-center"><b><i>Email: {{ teacher.user.email }}</b></i></p>
-                <p class="text-center"><b><i>Phone: {{ teacher.phone }}</b></i></p>
-                <p class="text-center"><b><i>Subjects: {{ teacher.subject1 }}, {{ teacher.subject2 }}, {{ teacher.subject3 }}</b></i></p>
-                <p class="text-center"><b><i>Hourly Rate: {{teacher.hourly_Rate}} Rs</b></i></p>
+                <h1 class="text-center">{{ teacher.user.username|capfirst }}</h1>
+                <p class="text-center"><b>Years of Experience: {{ teacher.experience }} years</b></p>
+                <p class="text-center"><b>Email: {{ teacher.user.email }}</b></p>
+                <p class="text-center"><b>Phone: {{ teacher.phone }}</b></p>
+                <p class="text-center"><b>Subjects: {{ teacher.subject1 }}, {{ teacher.subject2 }}, {{ teacher.subject3 }}</b></p>
+                <p class="text-center"><b>Hourly Rate: {{ teacher.hourly_Rate }} Rs</b></p>
             </div>
         </div>   
         <div class="row mt-3">

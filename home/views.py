@@ -155,12 +155,7 @@ def register(request):
    return render(request, 'userregistration.html', {'form': fm})
 
 
-# def verify_email(email, name):
-#     subject = 'Welcome to GFG world'
-#     message = f'Hi {name}, thank you for registering in GeeksforGeeks.'
-#     email_from = settings.EMAIL_HOST_USER
-#     recipient_list = [email]
-#     send_mail(subject, message, email_from, recipient_list)
+
 
 @never_cache
 def register_teacher(request):
@@ -217,14 +212,19 @@ def extracted_from_home(fm, data, request):
    reg_type = data['reg_type']
    if User.objects.filter(username=name).exists():
       messages.error(request, 'User with this username already exists.')
+      return redirect('home')
    elif Teacher.objects.filter(user__username=name).exists():
       messages.error(request, 'Exists as Teacher')
+      return redirect('home')
    elif Student.objects.filter(user__username=name).exists():
       messages.error(request, 'Exists as Student')
+      return redirect('home')
    elif User.objects.filter(email=email).exists():
       messages.error(request, 'Email is already registered.')
+      return redirect('home')
    elif len(password) < 8:
       messages.error(request, 'Password must be at least 8 characters long.')
+      return redirect('home')
    else:
       user = User.objects.create_user(username=name, email=email, password=password)
       # messages.success(request, 'I have taken notice!')
@@ -254,6 +254,9 @@ def extracted_from_register_Teacher(request, user):
     sub_instance_1, _ = Subject.objects.get_or_create(subject=sub1.title())
     sub_instance_2, _ = Subject.objects.get_or_create(subject=sub2.title())
     sub_instance_3, _ = Subject.objects.get_or_create(subject=sub3.title())
+    if Teacher.objects.filter(phone=phone).exists() or Student.objects.filter(phone=phone).exists():
+        messages.error(request, 'This phone number already exists.')
+        return redirect('home')
     if img is not None:
         Teacher.objects.create(
             user=user,
@@ -281,7 +284,7 @@ def extracted_from_register_Teacher(request, user):
         )
     return redirect('home')
 
-@never_cache
+
 def extracted_from_register_student(request,user):
    wallet=Wallet.objects.create(balance=0.00)
    phone = request.POST['phone']
@@ -291,6 +294,9 @@ def extracted_from_register_student(request,user):
    gender = request.POST['gender']
    img = request.FILES.get('student_image')
    gender_instance,_=Gender.objects.get_or_create(gender=gender.title())
+   if Teacher.objects.filter(phone=phone).exists() or Student.objects.filter(phone=phone).exists():
+    messages.error(request, 'This phone number already exists.')
+    return redirect('home')
    if img is not None:
       Student.objects.create(
          user=user,

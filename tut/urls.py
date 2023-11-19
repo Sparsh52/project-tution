@@ -23,7 +23,7 @@ urlpatterns = [
     path('available-slot-student/<teacher_id>/',available_slots_student,name='available_slots_student'),
     path('booked-slots-students/',booked_slots_students,name="booked_slots_students"),
      path('update-student/<int:student_id>/', update_student, name='student_update'),
-    #Teacher-related-shit
+    #Teacher-related-stuff
     path('teacher-profile-teacher/',teacher_profile_teacher,name='teacher_profile_teacher'),
     path('registered-students/',registered_students_teacher,name='registered_students_teacher'),
     path('student-profile-teacher/<int:student_id>',student_profile_teacher,name='student_profile_teacher'),
