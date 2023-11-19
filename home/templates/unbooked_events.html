@@ -7,7 +7,7 @@
                 <h5 class="card-title">{{ event.title }}</h5>
                 <p class="card-text">
                     <strong>Date:</strong> {{ event.start_date }}<br>
-                    <strong>Time:</strong> {{ event.start_time|time:"g:i A" }} to {{ event.end_time|time:"g:i A" }}
+                    <strong>Time:</strong> {{ event.start_time}} to {{ event.end_time|time:"g:i A" }}
                 </p>
                 <a href="{% url 'delete_event' event.id %}" class="btn btn-danger">Delete Slot</a>
             </div>

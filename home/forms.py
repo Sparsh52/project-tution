@@ -16,9 +16,9 @@ USER_CHOICES= [
     ('student', 'Student'),
     ]
 class UserRegistration(forms.Form):
-   name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Name', 'class': 'form-control'}))
-   email=forms.EmailField(widget=forms.EmailInput(attrs={'placeholder' :'Email', 'class': 'form-control'}))
-   password=forms.CharField(widget=forms.PasswordInput(attrs={'placeholder' :'Password', 'class': 'form-control'}))
+   name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Name', 'class': 'form-control', 'autocomplete':'off'}))
+   email=forms.EmailField(widget=forms.EmailInput(attrs={'placeholder' :'Email', 'class': 'form-control','autocomplete':'off'}))
+   password=forms.CharField(widget=forms.PasswordInput(attrs={'placeholder' :'Password', 'class': 'form-control','autocomplete':'off'}))
 
 class FeedbackForm(forms.ModelForm):
     class Meta:
@@ -36,7 +36,7 @@ class EventForm(ModelForm):
     fields = '__all__'
     # exclude=['created_by','booked_by']
 
-  def __init__(self, request,user_type,*args, **kwargs):
+  def __init__(self, request,user,user_type,*args, **kwargs):
      super(EventForm, self).__init__(*args, **kwargs)
      # input_formats parses HTML5 datetime-local input to datetime field
      self.fields['start_time'].input_formats = ('%Y-%m-%dT%H:%M',)

@@ -5,7 +5,19 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.urls import reverse
 from django.http import HttpResponse
 import random
+from .models import *
 # Create your models here.
+class Wallet(models.Model):
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    def deposit(self, amount):
+        self.balance += amount
+        self.save()
+    def withdraw(self, amount):
+        if self.balance >= amount:
+            self.balance -= amount
+            self.save()
+            return True
+        return False
 
 
 class Subject(models.Model):
@@ -67,6 +79,8 @@ class Student(models.Model):
     institution_name=models.CharField(max_length=100,blank=False,null=False)
     gender = models.ForeignKey(Gender,on_delete=models.CASCADE)
     student_image=models.ImageField(upload_to="student",blank=True, null=True)
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='student_wallet',blank=True,null=True)
+
     
     @property
     def student_photo(self):
@@ -104,10 +118,10 @@ class Event(models.Model):
     end_time = models.DateTimeField()
   
 
-    @property
-    def get_html_url(self):
-        url = reverse('event_edit', args=[self.created_by.id,self.id])
-        return f'<a href="{url}"> {self.title} </a>'    
+    # @property
+    # def get_html_url(self):
+    #     url = reverse('event_edit', args=[self.created_by.id,self.id])
+    #     return f'<a href="{url}"> {self.title} </a>'    
     def get_available_url(self, user_type):
         if user_type != 'student':
             url=reverse('available_slot_teacher')

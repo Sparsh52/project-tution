@@ -7,7 +7,6 @@
                         <div class="card-body">
                             <h5 class="card-title">{{ event.title }}</h5>
                             <p class="card-text">
-                                <strong>Date:</strong> {{ event.start_date }}<br>
                                 <strong>Time:</strong> {{ event.start_time }} to {{ event.end_time }}
                             </p>
                             <a href="{% if event.created_by %}/event-edit/{{ event.created_by.id }}/{{ event.id }}{% endif %}" class="btn btn-primary">check Slots</a>

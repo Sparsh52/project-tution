@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Teacher App</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
+    
+    <style>
+        .navbar-brand {
+            font-size: 17px; 
+            font-family: 'sans-serif';
+        }
+        .navbar {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+
+    </style>
 </head>
 <body class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-light bg-primary">
@@ -12,13 +24,16 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-            <a class="navbar-brand" href="https://hexaviewtech.com/" style="color: white;"><img src="/media/teacher/hexaview_logo.jfif" alt="Logo" height="70"></a>
-            <a class="navbar-brand" style="color: white;"><b><i>Teacher App</i></b></a>
-            <a class="navbar-brand" href="/teacher-profile-teacher/" style="color: white;"><b><i>Teacher Profile</i></b></a>
-            <a class="navbar-brand" href="/registered-students/" style="color: white;"><b><i> Student List</i></b></a>
-            <a class="navbar-brand" href="/event/new/{{ teacher.id }}" style="color: white;"><b><i>Create Event</i></b></a>
-            <a class="navbar-brand" href="/booked-slots-teacher/" style="color: white;"><b><i>Booked Slots</i></b></a>
-            <a class="navbar-brand" href="/available-slot-teacher/" style="color: white;"><b><i>UnBooked Slots</i></b></a>                   
+            <div class="d-flex align-items-center">
+                <a class="navbar-brand" href="https://hexaviewtech.com/" style="color: white; padding-left:10px;"><img src="/media/teacher/hexaview_logo.jfif" alt="Logo" height="70"></a>
+                <a class="navbar-brand" style="color: red; font-family: 'Helvetica', sans-serif;"><b>EduMentor</b></a>
+            </div>
+            <a class="navbar-brand" href="/teacher-profile-teacher/" style="color: white;"><b>Teacher Profile</b></a>
+            <a class="navbar-brand" href="/registered-students/" style="color: white;"><b> Student List</b></a>
+            <a class="navbar-brand" href="/event/new/{{ teacher.id }}" style="color: white;"><b>Create Event</b></a>
+            <a class="navbar-brand" href="/booked-slots-teacher/" style="color: white;"><b>Booked Slots</b></a>
+            <a class="navbar-brand" href="/available-slot-teacher/" style="color: white;"><b>UnBooked Slots</b></a> 
+            <a class="navbar-brand" href="/book-session/{{ teacher.id }}" style="color: white;"><b>Calendar</b></a>                          
             <div class="d-flex ms-auto">
                 <form class="form-inline my-2 my-lg-0">
                     <div class="input-group">

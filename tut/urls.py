@@ -33,6 +33,9 @@ urlpatterns = [
     path('update-teacher/<teacher_id>',update_teacher,name="teacher_update"),
     # path('logout/',LogoutView.as_view(next_page="/"), name='logout'),
     path('logout/',logout_page, name='logout'),
+    # path('verify-otp/', verify_otp, name='verify_otp')
+    path('view_fake_wallet/', view_fake_wallet, name='view_fake_wallet'),
+    path('deposit_fake_money/', deposit_fake_money, name='deposit_fake_money'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

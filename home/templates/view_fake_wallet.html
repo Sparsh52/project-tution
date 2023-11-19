@@ -1,0 +1,7 @@
+<!-- view_fake_wallet.html -->
+{% extends "base2.html" %}
+{% block content %}
+  <h1>Fake Wallet Balance</h1>
+  <p>Your fake wallet balance is ${{ wallet.balance }}</p>
+  <p><a href="{% url 'deposit_fake_money' %}">Deposit Money</a></p>
+{% endblock %}

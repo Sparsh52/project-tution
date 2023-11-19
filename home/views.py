@@ -274,6 +274,7 @@ def extracted_from_register_Teacher(request, user):
 
 @never_cache
 def extracted_from_register_student(request,user):
+   wallet=Wallet.objects.create(balance=0.00)
    phone = request.POST['phone']
    ins_type = request.POST['ins_type']
    standard_or_semester = request.POST.get('standard') or request.POST.get('semester')
@@ -289,7 +290,8 @@ def extracted_from_register_student(request,user):
          standard_or_semester=standard_or_semester,
          institution_name=institution_name,
          gender=gender_instance,
-         student_image=img
+         student_image=img,
+         wallet=wallet
       )
    else:
       Student.objects.create(
@@ -298,7 +300,8 @@ def extracted_from_register_student(request,user):
             institution_type=ins_type,
             standard_or_semester=standard_or_semester,
             institution_name=institution_name,
-            gender=gender_instance
+            gender=gender_instance,
+            wallet=wallet
       )
       return redirect('home')
    
@@ -314,7 +317,7 @@ def book_session(request,teacher_id):
    month_param = request.GET.get('month', None)
    d = get_date(month_param)
    cal = Calendar(d.year, d.month)
-   html_cal = cal.formatmonth(user_type,withyear=True)
+   html_cal = cal.formatmonth(request.user,user_type,withyear=True)
    context = {
         'calendar': mark_safe(html_cal),
         'prev_month': prev_month(d),
@@ -382,10 +385,10 @@ def event(request, teacher_id, event_id=None):
         if request.user != teacher.user:
            return HttpResponseForbidden("Fuck off!")
     if student is None:
-       form = EventForm(request,user_type,data=request.POST or None, instance=instance,initial={'created_by':teacher})
+       form = EventForm(request,request.user,user_type,data=request.POST or None, instance=instance,initial={'created_by':teacher})
     else:
        print(student)
-       form = EventForm(request,user_type,data=request.POST or None, instance=instance,initial={'booked_by':student})
+       form = EventForm(request,request.user,user_type,data=request.POST or None, instance=instance,initial={'booked_by':student})
    #  form = EventForm(requestuser_type,data=request.POST or None, instance=instance,initial={'created_by':teacher})
     if request.POST and form.is_valid():
         form.save()
@@ -499,3 +502,19 @@ def update_teacher(request, teacher_id):
        teacher.save()
        return redirect('/teacher-profile-teacher/')
     return render(request, 'teacher_update.html', {'teacher': teacher})
+
+@login_required
+def view_fake_wallet(request):
+    student=Student.objects.get(user=request.user)
+    wallet = student.wallet
+    print(wallet)
+    return render(request, 'view_fake_wallet.html', {'wallet': wallet})
+
+@login_required
+def deposit_fake_money(request):
+    if request.method == 'POST':
+        student=Student.objects.get(user=request.user)
+        amount = float(request.POST.get('amount'))
+        student.wallet.deposit(amount)
+        return redirect('/view_fake_wallet/')
+    return render(request, 'deposit_fake_money.html')
