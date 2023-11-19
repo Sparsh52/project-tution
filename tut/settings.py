@@ -133,3 +133,4 @@ MEDIA_ROOT =  os.path.join(BASE_DIR, 'public/static')
 MEDIA_URL = '/media/'
 
 
+SESSION_COOKIE_SECURE = False

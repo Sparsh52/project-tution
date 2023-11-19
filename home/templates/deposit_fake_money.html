@@ -1,10 +1,25 @@
+<!-- deposit_fake_money.html -->
 {% extends "base2.html" %}
 {% block content %}
-  <h1>Deposit Fake Money</h1>
-  <form method="post" action="{% url 'deposit_fake_money' %}">
-    {% csrf_token %}
-    <label for="amount">Amount:</label>
-    <input type="number" name="amount" step="0.01" required>
-    <button type="submit">Deposit</button>
-  </form>
+  <div class="container mt-5">
+    <div class="card shadow-lg mx-auto" style="max-width: 400px;">
+      <div class="card-body text-center">
+        <h1 class="card-title display-4">Deposit Fake Money</h1>
+        <form method="post" action="{% url 'deposit_fake_money' %}">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="amount">Amount:</label>
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text">&#8377;</span>
+              </div>
+              <input type="number" class="form-control" name="amount" step="0.01" required>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-success btn-lg btn-block mt-3">Deposit</button>
+        </form>
+        <img src="/media/teacher/money.jpg" alt="Money" class="img-fluid mt-3">
+      </div>
+    </div>
+  </div>
 {% endblock %}

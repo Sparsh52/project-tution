@@ -44,7 +44,8 @@
                                 <strong>Date:</strong> {{ event.start_date }}<br>
                                 <strong>Time:</strong> {{ event.start_time }} to {{ event.end_time }}
                             </p>
-                            <a href="/event-edit/{{teacher.id}}/{{ event.id }}" class="btn btn-primary">Book Slot</a>
+                            <!-- <a href="/event-edit/{{teacher.id}}/{{ event.id }}" class="btn btn-primary">Book Slot</a> -->
+                            <a href="{% url 'book_slot' teacher.id student.id event.id %}" class="btn btn-primary">Book Slot</a>
                         </div>
                     </div>
                 {% endfor %}

@@ -18,7 +18,6 @@ class Calendar(HTMLCalendar):
 		elif user_type == "student":
 			student = Student.objects.get(user=user)
 			events_per_day = events.filter(start_time__day=day, booked_by=None, created_by__in=student.teachers.all())
-		print(user_type)
 		color_list = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#ff8000", "#0080ff", "#80ff00", "#8000ff", "#ff0080"]
 		try:
 			li = [event.get_available_url(user_type) for event in events_per_day if event.booked_by is None]

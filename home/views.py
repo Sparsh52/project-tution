@@ -171,7 +171,10 @@ def register_teacher(request):
         messages.error(request, 'You are already registered as a teacher.')
         return redirect('home')
     if request.method == 'POST':
-      return extracted_from_register_Teacher(request, user)
+      try:
+         return extracted_from_register_Teacher(request, user)
+      except Exception as e:
+         return redirect("home")
     return render(request, 'teacherregistration.html')
 
 @never_cache
@@ -183,7 +186,10 @@ def register_student(request):
       messages.error(request, 'You are already registered as a student.')
       return redirect('home')
    if request.method == 'POST':
-      return extracted_from_register_student(request,user)
+      try:
+         return extracted_from_register_student(request,user)
+      except Exception as e:
+         return redirect("home")
    return render(request,"studentregistration.html")
 
 @never_cache
@@ -230,6 +236,7 @@ def extracted_from_home(fm, data, request):
         )
 
 def extracted_from_register_Teacher(request, user):
+    wallet=Wallet.objects.create(balance=0.00)
     data = request.POST
     hourly_Rate=data['hourly_rate']
     phone = data['phone']
@@ -257,7 +264,8 @@ def extracted_from_register_Teacher(request, user):
             experience=exp,
             gender=gender_instance,
             teacher_image=img,
-            hourly_Rate=hourly_Rate
+            hourly_Rate=hourly_Rate,
+            wallet=wallet
         )
     else:
         Teacher.objects.create(
@@ -268,7 +276,8 @@ def extracted_from_register_Teacher(request, user):
             subject3=sub_instance_3,
             experience=exp,
             gender=gender_instance,
-            hourly_Rate=hourly_Rate
+            hourly_Rate=hourly_Rate,
+            wallet=wallet
         )
     return redirect('home')
 
@@ -325,7 +334,6 @@ def book_session(request,teacher_id):
         'teacher':teacher,
         'user_type':user_type
     }
-   print(teacher)
    return render(request, 'calendar.html', context)
 
 
@@ -387,9 +395,7 @@ def event(request, teacher_id, event_id=None):
     if student is None:
        form = EventForm(request,request.user,user_type,data=request.POST or None, instance=instance,initial={'created_by':teacher})
     else:
-       print(student)
        form = EventForm(request,request.user,user_type,data=request.POST or None, instance=instance,initial={'booked_by':student})
-   #  form = EventForm(requestuser_type,data=request.POST or None, instance=instance,initial={'created_by':teacher})
     if request.POST and form.is_valid():
         form.save()
         return redirect(reverse('book_session', kwargs={'teacher_id': teacher.id}))
@@ -401,12 +407,13 @@ def event(request, teacher_id, event_id=None):
 @login_required(login_url='home')
 def available_slots_student(request, teacher_id):
     teacher=get_object_or_404(Teacher,id=teacher_id)
+    student=Student.objects.get(user=request.user)
     teacher_events = Event.objects.filter(created_by__id=teacher_id, booked_by__isnull=True)
     if request.method=="POST":
         selected_date = request.POST.get('selectedDate')
         date_filter = Q(start_time__icontains=selected_date)
         teacher_events = teacher_events.filter(date_filter)
-    return render(request, 'available_slots.html', {'teacher_events': teacher_events,'teacher':teacher})
+    return render(request, 'available_slots.html', {'teacher_events': teacher_events,'teacher':teacher,'student':student})
 
 
 @never_cache
@@ -503,18 +510,51 @@ def update_teacher(request, teacher_id):
        return redirect('/teacher-profile-teacher/')
     return render(request, 'teacher_update.html', {'teacher': teacher})
 
-@login_required
+@never_cache
+@login_required(login_url='home')
 def view_fake_wallet(request):
-    student=Student.objects.get(user=request.user)
-    wallet = student.wallet
-    print(wallet)
-    return render(request, 'view_fake_wallet.html', {'wallet': wallet})
+    try:
+        student = Student.objects.get(user=request.user)
+        user_type = "student"
+    except Student.DoesNotExist:
+        user_type = "teacher"
+        teacher=Teacher.objects.get(user=request.user)
+        if request.user != teacher.user:
+           return HttpResponseForbidden("Fuck off!")
+    if user_type=='student':
+       student_wallet = student.wallet
+       return render(request, 'view_fake_wallet.html', {'wallet': student_wallet,'user_type':user_type})
+    else:
+       teacher_wallet=teacher.wallet
+       return render(request, 'view_fake_wallet_teacher.html', {'wallet': teacher_wallet,'user_type':user_type})
 
-@login_required
+@never_cache
+@login_required(login_url='home')
 def deposit_fake_money(request):
     if request.method == 'POST':
-        student=Student.objects.get(user=request.user)
-        amount = float(request.POST.get('amount'))
-        student.wallet.deposit(amount)
-        return redirect('/view_fake_wallet/')
+        student = Student.objects.get(user=request.user)
+        if student.wallet is not None:
+            amount = float(request.POST.get('amount'))
+            student.wallet.deposit(amount)
+        else:
+            print("No wallet associated with the student")
+        return redirect(reverse('view_fake_wallet'))
     return render(request, 'deposit_fake_money.html')
+
+@never_cache
+@login_required(login_url='home')
+def book_slot(request, teacher_id, student_id, event_id):
+    teacher = Teacher.objects.get(id=teacher_id)
+    student = Student.objects.get(id=student_id)
+    event = Event.objects.get(id=event_id)
+    duration_hours = (event.end_time - event.start_time).seconds // 3600
+    print(duration_hours)
+    event_cost = duration_hours * teacher.hourly_Rate
+    if student.wallet.balance >= event_cost:
+        student.wallet.withdraw(event_cost)
+        teacher.wallet.deposit(event_cost)
+        event.booked_by = student
+        event.save()
+        return render(request, 'booking_success.html', {'teacher': teacher, 'event': event})
+    else:
+        return HttpResponse("Plz Fill your Balance")

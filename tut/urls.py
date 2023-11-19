@@ -34,8 +34,9 @@ urlpatterns = [
     # path('logout/',LogoutView.as_view(next_page="/"), name='logout'),
     path('logout/',logout_page, name='logout'),
     # path('verify-otp/', verify_otp, name='verify_otp')
-    path('view_fake_wallet/', view_fake_wallet, name='view_fake_wallet'),
-    path('deposit_fake_money/', deposit_fake_money, name='deposit_fake_money'),
+    path('view-fake-wallet/', view_fake_wallet, name='view_fake_wallet'),
+    path('deposit-fake-money/', deposit_fake_money, name='deposit_fake_money'),
+    path('book-slot/<int:teacher_id>/<int:student_id>/<int:event_id>/', book_slot, name='book_slot')
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

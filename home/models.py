@@ -5,10 +5,10 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.urls import reverse
 from django.http import HttpResponse
 import random
-from .models import *
+
 # Create your models here.
 class Wallet(models.Model):
-    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    balance = models.IntegerField(default=0)
     def deposit(self, amount):
         self.balance += amount
         self.save()
@@ -18,7 +18,6 @@ class Wallet(models.Model):
             self.save()
             return True
         return False
-
 
 class Subject(models.Model):
     subject=models.CharField(max_length=100)
@@ -45,6 +44,7 @@ class Teacher(models.Model):
     hourly_Rate=models.IntegerField()
     teacher_image=models.ImageField(upload_to="teacher",blank=True, null=True)
     registered_students = models.ManyToManyField('Student', related_name='teachers', blank=True)
+    wallet=models.ForeignKey(Wallet,related_name='wallet_teacher',on_delete=models.CASCADE,default=None)
 
     
     @property
@@ -79,7 +79,7 @@ class Student(models.Model):
     institution_name=models.CharField(max_length=100,blank=False,null=False)
     gender = models.ForeignKey(Gender,on_delete=models.CASCADE)
     student_image=models.ImageField(upload_to="student",blank=True, null=True)
-    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='student_wallet',blank=True,null=True)
+    wallet=models.ForeignKey(Wallet,related_name='wallet_student',on_delete=models.CASCADE,default=None)
 
     
     @property
