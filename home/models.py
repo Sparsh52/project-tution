@@ -116,12 +116,7 @@ class Event(models.Model):
     description = models.TextField()
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
-  
-
-    # @property
-    # def get_html_url(self):
-    #     url = reverse('event_edit', args=[self.created_by.id,self.id])
-    #     return f'<a href="{url}"> {self.title} </a>'    
+    
     def get_available_url(self, user_type):
         if user_type != 'student':
             url=reverse('available_slot_teacher')

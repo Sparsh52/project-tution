@@ -24,7 +24,6 @@ from django.http import HttpResponseForbidden
 
 @never_cache
 def home(request):
-    # Check if the user is already authenticated
     if request.user.is_authenticated:
         try:
             # Attempt to get the Teacher profile
@@ -32,15 +31,11 @@ def home(request):
             return redirect('/teacher-profile-teacher/')
         except Teacher.DoesNotExist:
             try:
-                # Attempt to get the Student profile
                 student = Student.objects.get(user=request.user)
                 return redirect('/student-profile/')
             except Student.DoesNotExist:
-                # Handle the case where the user is authenticated but not a Teacher or Student
                 messages.error(request, 'Invalid user type')
                 return redirect('home')
-
-    # Handle POST requests for login
     if request.method == "POST":
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -201,10 +196,6 @@ def teacher_profile(request, teacher_id):
     return render(request, 'teacher_profile.html', context)
 
 
-
-
-#----------------------------------------Helpers-----------------------------------------------#
-
 def extracted_from_home(fm, data, request):
    name = fm.cleaned_data['name']
    email = fm.cleaned_data['email']
@@ -227,7 +218,6 @@ def extracted_from_home(fm, data, request):
       return redirect('home')
    else:
       user = User.objects.create_user(username=name, email=email, password=password)
-      # messages.success(request, 'I have taken notice!')
       request.session['reg_type'] = reg_type
       request.session['user_id'] = user.id
       return (
@@ -397,7 +387,7 @@ def event(request, teacher_id, event_id=None):
     except Student.DoesNotExist:
         user_type = "teacher"
         if request.user != teacher.user:
-           return HttpResponseForbidden("Fuck off!")
+           return HttpResponseForbidden("Forbidden access!")
     if student is None:
        form = EventForm(request,request.user,user_type,data=request.POST or None, instance=instance,initial={'created_by':teacher})
     else:
@@ -526,7 +516,7 @@ def view_fake_wallet(request):
         user_type = "teacher"
         teacher=Teacher.objects.get(user=request.user)
         if request.user != teacher.user:
-           return HttpResponseForbidden("Fuck off!")
+           return HttpResponseForbidden("Red Alert,Red Alert!")
     if user_type=='student':
        student_wallet = student.wallet
        return render(request, 'view_fake_wallet.html', {'wallet': student_wallet,'user_type':user_type})
