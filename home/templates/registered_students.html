@@ -2,35 +2,35 @@
 {% load static %}
 {% block content %}
 <style>
-    /* Include your Google Font link here */
+    
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
     /* Apply the font to the text */
     .teacher-details p,
     .btn {
         font-family: 'Roboto', sans-serif;
-        font-style: normal; /* Remove italics */
-        color: #333; /* Set your desired text color */
+        font-style: normal; 
+        color: #333; 
     }
 
     /* Additional styling for the card and image */
     .search-card-result {
-        background-color: #fff; /* Set your desired background color */
-        border: 1px solid #ddd; /* Set your desired border color */
-        border-radius: 10px; /* Set your desired border radius */
+        background-color: #fff; 
+        border: 1px solid #ddd; 
+        border-radius: 10px; 
     }
 
     .teacher-details {
-        padding: 20px; /* Set your desired padding */
+        padding: 20px; 
     }
 
     .img-fluid {
-        width: 100%; /* Ensure the image fills its container */
-        border-radius: 10px 10px 0 0; /* Set your desired border radius for the image */
+        width: 100%; 
+        border-radius: 10px 10px 0 0; 
     }
 
     .more-offers {
-        padding: 20px; /* Set your desired padding */
+        padding: 20px; 
     }
 </style>
 
@@ -38,11 +38,8 @@
     {% for student in students %}
         <div class="row search-card-result rounded shadow-lg mb-1 d-flex justify-content-center align-items-center mx-auto" style="width: 55vw;">
             <div class="col-md-3">
-                <!-- Display student image -->
                 <img class="img-fluid rounded-top" src="{{ student.student_image_url }}" alt="Student Image">
             </div>
-
-            <!-- Student Details Column -->
             <div class="col-md-5">
                 <div class="card-body teacher-details">
                     <p class="text-center"><b>{{ student.user.username|capfirst }}</b></p>
@@ -51,10 +48,7 @@
                     <p class="text-center"><b>Phone: {{ student.phone  }}</b></p>
                 </div>
             </div>
-
-            <!-- Additional Information and Buttons Column -->
             <div class="col-md-4 border-left text-center more-offers">
-                <!-- Buttons -->
                 <div class="mt-3">
                     <a href="/student-profile-teacher/{{ student.id }}" class="btn btn-primary btn-lg">Profile</a><br>
                 </div>

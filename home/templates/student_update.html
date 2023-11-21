@@ -7,7 +7,7 @@
             <div class="form-group">
                 <div class="mb-3">
                     <label for="exampleInputEmail1" class="form-label">Phone Number</label>
-                    <input type="tel" class="form-control" name="phone" id="exampleInputEmail1" aria-describedby="emailHelp">
+                    <input type="tel" class="form-control" name="phone" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off">
                 </div>
                 <label for="exampleDataList" class="form-label">Gender</label>
                 <select class="form-control" aid="id_gender_type" name="gender">
@@ -21,15 +21,15 @@
                 </select>
                 <div class="mb-3">
                     <label for="exampleInputEmail1" class="form-label">Institution Name</label>
-                    <input type="text" class="form-control" name="institution_name" id="exampleInputEmail1" aria-describedby="emailHelp">
+                    <input type="text" class="form-control" name="institution_name" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off">
                 </div>
                 <div id="semesterField" style="display: none;">
                     <label for="exampleDataList" class="form-label">Semester</label>
-                    <input class="form-control" type="text" name="semester" placeholder="Semester">
+                    <input class="form-control" type="text" name="semester" placeholder="Semester" autocomplete="off">
                 </div>
                 <div id="standardField">
                     <label for="exampleDataList" class="form-label">Standard</label>
-                    <input class="form-control" type="text" name="standard" placeholder="Standard">
+                    <input class="form-control" type="text" name="standard" placeholder="Standard" autocomplete="off">
                 </div>
             </div>
             <div class="mb-3">
@@ -45,7 +45,6 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // Function to show/hide fields based on institution type
     function toggleFields() {
         var institutionType = document.getElementById("id_institution_type").value;
         var semesterField = document.getElementById("semesterField");
@@ -59,11 +58,7 @@ document.addEventListener("DOMContentLoaded", function() {
             standardField.style.display = "block";
         }
     }
-
-    // Initial toggle
     toggleFields();
-
-    // Attach an event listener to the select element
     document.getElementById("id_institution_type").addEventListener("change", toggleFields);
 });
 </script>

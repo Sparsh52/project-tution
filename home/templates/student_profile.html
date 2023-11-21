@@ -15,15 +15,73 @@
                 <p class="text-center"><b>School/University:</b> {{ student.institution_name|capfirst }}</p>
                 <p class="text-center"><b>Phone:</b> {{ student.phone }}</p>
 
+                {% if student.institution_type == "School" %}
+                {% if student.standard_or_semester == "first" %}
+                <p class="text-center"><b>Standard:</b>1<sup>th</sup></p>
+                {% endif %}
+                {% if student.standard_or_semester == "second" %}
+                <p class="text-center"><b>Standard:</b>2<sup>th</sup></p>
+                {% endif %}
+                {% if student.standard_or_semester == "third" %}
+                <p class="text-center"><b>Standard:</b>3<sup>th</sup></p>
+                {% endif %}
+                {% if student.standard_or_semester == "fourth" %}
+                <p class="text-center"><b>Standard:</b>4<sup>th</sup></p>
+                {% endif %}
+                {% if student.standard_or_semester == "fifth" %}
+                <p class="text-center"><b>Standard:</b>5<sup>th</sup></p>
+                {% endif %}
+                {% if student.standard_or_semester == "sixth" %}
+                <p class="text-center"><b>Standard:</b>6<sup>th</sup></p>
+                {% endif %}
+                {% if student.standard_or_semester == "seventh" %}
+                <p class="text-center"><b>Standard:</b>7<sup>th</sup></p>
+                {% endif %}
+                {% if student.standard_or_semester == "eighth" %}
+                <p class="text-center"><b>Standard:</b>8<sup>th</sup></p>
+                {% endif %}
+                {% if student.standard_or_semester == "ninth" %}
+                <p class="text-center"><b>Standard:</b>9<sup>th</sup></p>
+                {% endif %}
+                {% if student.standard_or_semester == "tenth" %}
+                <p class="text-center"><b>Standard:</b>10<sup>th</sup></p>
+                {% endif %}
+                {% if student.standard_or_semester == "eleventh" %}
+                <p class="text-center"><b>Standard:</b>11<sup>th</sup></p>
+                {% endif %}
+                {% if student.standard_or_semester == "twelfth" %}
+                <p class="text-center"><b>Standard:</b>12<sup>th</sup></p>
+                {% endif %}
+                {% endif %}
+
                 {% if student.institution_type == "University" %}
-                    <p class="text-center"><b>Semester:</b> {{ student.standard_or_semester }}</p>
-                {% elif student.institution_type == "School" %}
-                    <p class="text-center"><b>Standard:</b> {{ student.standard_or_semester }}</p>
+                {% if student.standard_or_semester == "first" %}
+                <p class="text-center"><b>Semester:</b>1<sup>th</sup></p>
+                {% endif %}
+                {% if student.standard_or_semester == "second" %}
+                <p class="text-center"><b>Semester:</b>2<sup>th</sup></p>
+                {% endif %}
+                {% if student.standard_or_semester == "third" %}
+                <p class="text-center"><b>Semester:</b>3<sup>th</sup></p>
+                {% endif %}
+                {% if student.standard_or_semester == "fourth" %}
+                <p class="text-center"><b>Semester:</b>4<sup>th</sup></p>
+                {% endif %}
+                {% if student.standard_or_semester == "fifth" %}
+                <p class="text-center"><b>Semester:</b>5<sup>th</sup></p>
+                {% endif %}
+                {% if student.standard_or_semester == "sixth" %}
+                <p class="text-center"><b>Semester:</b>6<sup>th</sup></p>
+                {% endif %}
+                {% if student.standard_or_semester == "seventh" %}
+                <p class="text-center"><b>Semester:</b>7<sup>th</sup></p>
+                {% endif %}
+                {% if student.standard_or_semester == "eighth" %}
+                <p class="text-center"><b>Semester:</b>8<sup>th</sup></p>
+                {% endif %}
                 {% endif %}
             </div>
         </div>
-
-        <!-- Add buttons for profile and booking session -->
         <div class="row mt-3">
             <div class="col-md-6 mx-auto">
                 <a class="btn btn-danger btn-lg btn-block" href="/update-student/{{ student.id }}">Update Profile</a>

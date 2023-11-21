@@ -4,16 +4,37 @@
   <div class="container mt-5">
     <div class="card shadow-lg mx-auto" style="max-width: 400px;">
       <div class="card-body text-center">
-        <h1 class="card-title display-4">Deposit Fake Money</h1>
+        <h1 class="card-title display-4">Deposit Money</h1>
         <form method="post" action="{% url 'deposit_fake_money' %}">
           {% csrf_token %}
+          <div class="form-group flex-container">
+            <div class="flex-item left-hand">
+              <label for="credit_card">Credit Card Number:</label>
+              <input type="text" class="form-control" name="credit_card" placeholder="XXXX XXXX XXXX XXXX" autocomplete="off">
+            </div>
+            <div class="flex-item">
+              <label for="cvv">CVV:</label>
+              <input type="password" class="form-control" name="cvv" placeholder="CVV" size="3" required maxlength="3" autocomplete="off">
+            </div>
+          </div>
+          
+          <div class="form-group flex-container">
+            <div class="flex-item left-hand">
+              <label for="cardholder_name">Cardholder Name:</label>
+              <input type="text" class="form-control" name="cardholder_name" placeholder="Cardholder Name" autocomplete="off">
+            </div>
+            <div class="flex-item">
+              <label for="expiration_date">Expiration Date:</label>
+              <input type="text" class="form-control" name="expiration_date" placeholder="MM/YY" autocomplete="off">
+            </div>
+          </div>         
           <div class="form-group">
             <label for="amount">Amount:</label>
             <div class="input-group">
               <div class="input-group-prepend">
                 <span class="input-group-text">&#8377;</span>
               </div>
-              <input type="number" class="form-control" name="amount" step="0.01" required>
+              <input type="number" class="form-control" name="amount" step="0.01" min="100" autocomplete="off">
             </div>
           </div>
           <button type="submit" class="btn btn-success btn-lg btn-block mt-3">Deposit</button>

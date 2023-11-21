@@ -455,15 +455,19 @@ def logout_page(request):
 def update_student(request, student_id):
     student = Student.objects.get(id=student_id)
     if request.method == "POST":
-        student.phone = request.POST['phone']
-        student.institution_type = request.POST['ins_type']
-        student.standard_or_semester = request.POST.get('standard') or request.POST.get('semester')
-        student.institution_name = request.POST['institution_name']
-        gender = request.POST['gender']
+        phone = request.POST.get("phone", "")
+        student.phone = phone if phone else student.phone
+        student.institution_type = request.POST.get('ins_type', student.institution_type)
+        student.standard_or_semester = request.POST.get('standard',student.standard_or_semester) or request.POST.get('semester', student.standard_or_semester)
+        student.institution_name = request.POST.get('institution_name', student.institution_name)
+        gender = request.POST.get("gender", "")
+        if gender != "":
+            gender_instance, _ = Gender.objects.get_or_create(gender=gender.title())
+            student.gender = gender_instance 
         img = request.FILES.get('student_image')
         if img is not None:
             print('yay!')
-            student.student_image=img
+            student.student_image = img
         else:
             print('Nay')
         student.gender_instance, _ = Gender.objects.get_or_create(gender=gender.title())
@@ -471,39 +475,37 @@ def update_student(request, student_id):
         return redirect('/student-profile/')
     return render(request, 'student_update.html', {'student': student})
 
-@never_cache
-@login_required(login_url='home')
 def update_teacher(request, teacher_id):
     teacher = Teacher.objects.get(id=teacher_id)
     if request.method == "POST":
-       data = request.POST
-       hourly_Rate=data['hourly_rate']
-       phone = data['phone']
-       sub1 = data['sub1']
-       sub2 = data['sub2']
-       sub3 = data['sub3']
-       exp = data['exp']
-       gender = data['gender']
-       img = request.FILES.get('teacher_image')
-       if img is not None:
-          teacher.teacher_image=img
-          print('Yeah!')
-       else:
-          print('Nah man!')
-       gender_instance,_=Gender.objects.get_or_create(gender=gender.title())
-       sub_instance_1, _ = Subject.objects.get_or_create(subject=sub1.title())
-       sub_instance_2, _ = Subject.objects.get_or_create(subject=sub2.title())
-       sub_instance_3, _ = Subject.objects.get_or_create(subject=sub3.title())
-       teacher.hourly_Rate=hourly_Rate
-       teacher.phone=phone
-       teacher.subject1 = sub_instance_1
-       teacher.subject2 = sub_instance_2
-       teacher.subject3 = sub_instance_3
-       teacher.experience=exp
-       teacher.gender = gender_instance
-       teacher.hourly_Rate=hourly_Rate
-       teacher.save()
-       return redirect('/teacher-profile-teacher/')
+        data = request.POST
+        hourly_rate = data.get("hourly_rate", "")
+        teacher.hourly_Rate = hourly_rate if hourly_rate else teacher.hourly_Rate
+        phone = data.get("phone", "")
+        teacher.phone = phone if phone else teacher.phone
+        sub1 = data.get("sub1", "")
+        if sub1 != "":
+            teacher.subject1, _ = Subject.objects.get_or_create(subject=sub1.title())
+        sub2 = data.get("sub2", "")
+        if sub2 != "":
+            teacher.subject2, _ = Subject.objects.get_or_create(subject=sub2.title())
+        sub3 = data.get("sub3", "")
+        if sub3 != "":
+            teacher.subject3, _ = Subject.objects.get_or_create(subject=sub3.title())
+        exp = int(data["exp"]) if "exp" in data and data["exp"] != '' else teacher.experience
+        teacher.experience = exp
+        gender = data.get("gender", "")
+        if gender != "":
+            gender_instance, _ = Gender.objects.get_or_create(gender=gender.title())
+            teacher.gender = gender_instance
+        img = request.FILES.get('teacher_image')
+        if img is not None:
+            teacher.teacher_image = img
+            print('Yeah!')
+        else:
+            print('Nah man!')
+        teacher.save()
+        return redirect('/teacher-profile-teacher/')
     return render(request, 'teacher_update.html', {'teacher': teacher})
 
 @never_cache

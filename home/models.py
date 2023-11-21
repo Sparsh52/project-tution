@@ -119,9 +119,12 @@ class Event(models.Model):
     
     def get_available_url(self, user_type):
         if user_type != 'student':
-            url=reverse('available_slot_teacher')
-            return (f'<a href="{url}" style="color: black;">{self.title}</a>',self.title,self.created_by)
+            if self.booked_by is None:
+                url=reverse('available_slot_teacher')
+            else:
+                url=reverse('booked_slots_teacher')
+            return (f'<a href="{url}" style="color: white;">{self.title}</a>',self.title,self.created_by,self.booked_by)
         url = reverse('available_slots_student', args=[self.created_by.id])
-        return (f'<a href="{url}" style="color: black;">{self.title}</a>',self.title,self.created_by)
+        return (f'<a href="{url}" style="color: white;">{self.title}</a>',self.title,self.created_by,self.booked_by)
     
 
