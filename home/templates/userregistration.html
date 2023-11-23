@@ -4,6 +4,7 @@
 <div style="background-image: url('https://images.theconversation.com/files/268439/original/file-20190409-2921-1a4uike.jpg?ixlib=rb-1.1.0&q=45&auto=format&w=1000&fit=clip'); background-repeat: no-repeat; background-position: center; background-size: cover; height: 100vh; width: 100vw; position: absolute">
     <div class="container mt-5"></div>
     <form class="col-3 mx-auto card p-3 shadow-lg" action="{% url 'register' %}" method="POST">
+        <h1 class="card-title display-6" >Registration-Page</h1>
         {% csrf_token %}
         {{form.as_p}}
         <div class="form-group">

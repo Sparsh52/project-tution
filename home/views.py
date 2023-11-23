@@ -380,24 +380,55 @@ def registered_teachers_list(request):
 def event(request, teacher_id, event_id=None):
     teacher = get_object_or_404(Teacher, id=teacher_id)
     instance = get_object_or_404(Event, pk=event_id) if event_id else Event()
-    student=None
+    student = None
+    # Check user type
     try:
         student = Student.objects.get(user=request.user)
         user_type = "student"
     except Student.DoesNotExist:
         user_type = "teacher"
         if request.user != teacher.user:
-           return HttpResponseForbidden("Forbidden access!")
-    if student is None:
-       form = EventForm(request,request.user,user_type,data=request.POST or None, instance=instance,initial={'created_by':teacher})
-    else:
-       form = EventForm(request,request.user,user_type,data=request.POST or None, instance=instance,initial={'booked_by':student})
+            return HttpResponseForbidden("Forbidden access!")
+
+    # Common parameters for EventForm instantiation
+    form_params = {
+        'request': request,
+        'user': request.user,
+        'user_type': user_type,
+        'data': request.POST or None,
+        'instance': instance,
+        'initial': {'created_by': teacher}
+        if student is None
+        else {'booked_by': student},
+    }
+
+    form = EventForm(**form_params)
+
     if request.POST and form.is_valid():
+        data = request.POST
+        print(data)
+        start_date_str = data['start_time'].split('T')[0]  
+        start_time_str = data['start_time'].split('T')[1]
+        end_date_str = data['end_time'].split('T')[0]  
+        end_time_str = data['end_time'].split('T')[1]    
+        start_date_obj = datetime.strptime(start_date_str, "%Y-%m-%d")
+        start_time_obj = datetime.strptime(start_time_str, "%H:%M")
+        end_date_obj = datetime.strptime(end_date_str, "%Y-%m-%d")
+        end_time_obj = datetime.strptime(end_time_str, "%H:%M")
+        if Event.objects.filter(
+                Q(start_time__date=start_date_obj) &
+                Q(end_time__date=end_date_obj) &
+                Q(start_time__time=start_time_obj) &
+                Q(end_time__time=end_time_obj)
+        ).exists():
+            print("Not Possible")
+            messages.error(request,"Not Possible")
+            return redirect(reverse('event_new', kwargs={'teacher_id': teacher.id}))
         form.save()
         return redirect(reverse('book_session', kwargs={'teacher_id': teacher.id}))
     if event_id is None:
-        return render(request, 'event.html', {'form': form, 'teacher': teacher,'user_type':user_type})
-    return render(request, 'event.html', {'form': form, 'instance': instance, 'teacher': teacher,'user_type':user_type})
+        return render(request, 'event.html', {'form': form, 'teacher': teacher, 'user_type': user_type})
+    return render(request, 'event.html', {'form': form, 'instance': instance, 'teacher': teacher, 'user_type': user_type})
 
 @never_cache
 @login_required(login_url='home')
@@ -416,7 +447,7 @@ def available_slots_student(request, teacher_id):
 @login_required(login_url='home')
 def booked_slots_students(request):
    student = Student.objects.get(user=request.user)
-   booked_events = Event.objects.filter(booked_by_id=student.id)
+   booked_events = Event.objects.filter(booked_by__id=student.id)
    context = {
         'booked_events': booked_events,
     }

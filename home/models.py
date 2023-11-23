@@ -114,8 +114,8 @@ class Event(models.Model):
     booked_by=models.ForeignKey(Student,on_delete=models.CASCADE,blank=True,null=True)
     title = models.CharField(max_length=200)
     description = models.TextField()
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    start_time = models.DateTimeField(blank=True, null=True)
+    end_time = models.DateTimeField(blank=True, null=True)
     
     def get_available_url(self, user_type):
         if user_type != 'student':
