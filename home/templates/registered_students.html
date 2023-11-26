@@ -42,10 +42,15 @@
             </div>
             <div class="col-md-5">
                 <div class="card-body teacher-details">
-                    <p class="text-center"><b>{{ student.user.username|capfirst }}</b></p>
-                    <p class="text-center"><b>Institution-type:{{ student.institution_type|capfirst}}</b></p>
-                    <p class="text-center"><b>School/University:{{ student.institution_name|capfirst}}</b></p>
-                    <p class="text-center"><b>Phone: {{ student.phone  }}</b></p>
+                    <p class="text-center">{{ student.user.name|capfirst }}</p>
+                    <p class="text-center"><b>Institution Type:</b> {{ student.institution_type|capfirst }}</p>
+                    <p class="text-center"><b>School/University:</b> {{ student.institution_name|capfirst }}</p>
+                    <p class="text-center"><b>Phone:</b> {{ student.user.phone }}</p>
+                    {% if student.institution_type == 'University' %}
+                    <p class="text-center"><b>Semester: {{ student.standard_or_semester }}<sup>th</sup></b></p>
+                    {% elif student.institution_type == 'School' %}
+                    <p class="text-center"><b>Standard: {{ student.standard_or_semester }}<sup>th</sup></b></p>
+                    {% endif %}
                 </div>
             </div>
             <div class="col-md-4 border-left text-center more-offers">

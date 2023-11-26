@@ -10,10 +10,15 @@
 
         <div class="row mt-3">
             <div class="col-md-5 mx-auto card shadow-lg">
-                <h1 class="text-center">{{ student.user.username|capfirst }}</h1>
-                <p class="text-center"><b><i>Institution-type:{{ student.institution_type|capfirst}}</b></i></p>
-                <p class="text-center"><b><i>School/Universty:{{ student.institution_name|capfirst}}</b></i></p>
-                <p class="text-center"><b><i>Phone: {{ student.phone  }}</b></i></p>
+                <h1 class="text-center">{{ student.user.name|capfirst }}</h1>
+                <p class="text-center"><b>Institution Type:</b> {{ student.institution_type|capfirst }}</p>
+                <p class="text-center"><b>School/University:</b> {{ student.institution_name|capfirst }}</p>
+                <p class="text-center"><b>Phone:</b> {{ student.user.phone }}</p>
+                {% if student.institution_type == 'University' %}
+                <p class="text-center"><b>Semester: {{ student.standard_or_semester }}<sup>th</sup></b></p>
+                {% elif student.institution_type == 'School' %}
+                <p class="text-center"><b>Standard: {{ student.standard_or_semester }}<sup>th</sup></b></p>
+                {% endif %}
             </div>
         </div>
     </div>

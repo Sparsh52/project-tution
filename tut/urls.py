@@ -31,11 +31,9 @@ urlpatterns = [
     path('booked-slots-teacher/',booked_slots_teacher,name='booked_slots_teacher'),
     path('delete-event/<int:event_id>/',delete_event, name='delete_event'),
     path('update-teacher/<teacher_id>',update_teacher,name="teacher_update"),
-    # path('logout/',LogoutView.as_view(next_page="/"), name='logout'),
     path('logout/',logout_page, name='logout'),
-    # path('verify-otp/', verify_otp, name='verify_otp')
-    path('view-fake-wallet/', view_fake_wallet, name='view_fake_wallet'),
-    path('deposit-fake-money/', deposit_fake_money, name='deposit_fake_money'),
+    path('view-wallet/', view_wallet, name='view_wallet'),
+    path('deposit-money/', deposit_money, name='deposit_money'),
     path('book-slot/<int:teacher_id>/<int:student_id>/<int:event_id>/', book_slot, name='book_slot')
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

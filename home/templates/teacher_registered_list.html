@@ -26,12 +26,18 @@
                         
                         <div class="col-md-5">
                             <div class="card-body teacher-details">
-                                <p class="text-center"><b>Teacher Name:{{ teacher.user.username|capfirst }}</b></p>
-                                <p class="text-center"><b>Years of experience: {{ teacher.experience }} years</b></p>
+                                <p class="text-center"><b>{{ teacher.user.name|capfirst }}</b></p>
+                                <p class="text-center"><b>Years of Experience: {{ teacher.experience }} years</b></p>
                                 <p class="text-center"><b>Email: {{ teacher.user.email }}</b></p>
-                                <p class="text-center"><b>Phone: {{ teacher.phone }}</b></p>
-                                <p class="text-center"><b>Subjects: {{ teacher.subject1 }}, {{ teacher.subject2 }}, {{ teacher.subject3 }}</b></p>
-                                <p class="text-center"><b>Hourly Rate: {{ teacher.hourly_Rate }} Rs</b></p>
+                                <p class="text-center"><b>Phone: {{ teacher.user.phone }}</b></p>
+                                <p class="text-center"><b>Subjects: {{ teacher.subject1.subject }}, {{ teacher.subject2.subject }}, {{ teacher.subject3.subject }}</b></p>
+                                <p class="text-center"><b>Hourly Rate: {{ teacher.min_hourly_rate }} - {{ teacher.max_hourly_rate }} Rs</b></p>
+                                <p class="text-center"><b>Teacher Type: {{ teacher.teacher_type }}</b></p>
+                                {% if teacher.teacher_type == 'College' %}
+                                    <p class="text-center"><b>Semester Uptil: {{ teacher.standard_or_semester }}<sup>th</sup></b></p>
+                                {% elif teacher.teacher_type == 'School' %}
+                                    <p class="text-center"><b>Standard Uptil: {{ teacher.standard_or_semester }}<sup>th</sup></b></p>
+                                {% endif %}
                             </div>
                         </div>
                         
@@ -43,6 +49,29 @@
                     </div>
                     <br>
                 {% endfor %}
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center">
+                        {% if teachers.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link btn btn-success" href="?page=1" style="font-weight: bold;">&laquo; first</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link btn btn-success" href="?page={{ teachers.previous_page_number }}" style="font-weight: bold;">previous</a>
+                            </li>
+                        {% endif %}
+                        <span class="current text-muted" style="font-weight: bold;">
+                            Page {{ teachers.number }} of {{ teachers.paginator.num_pages }}.
+                        </span>
+                        {% if teachers.has_next %}
+                            <li class="page-item">
+                                <a class="page-link btn btn-danger" href="?page={{ teachers.next_page_number }}" style="font-weight: bold;">next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link btn btn-danger" href="?page={{ teachers.paginator.num_pages }}" style="font-weight: bold;">last &raquo;</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
             </div>
 
         </div>

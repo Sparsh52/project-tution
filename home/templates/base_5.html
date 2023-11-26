@@ -73,10 +73,13 @@
         <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
             <a class="navbar-brand" style="color: red; font-family: 'Helvetica', sans-serif; padding-left: 10px;"><b>EduMentor</b></a>
             <ul>
-                <li><a class="navbar-brand" href="/teachers-list/" style="color: white;"><b>Teacher List</b></a></li>
-                <li><a class="navbar-brand" href="/registered-teachers-list/" style="color: white;"><b>Registered Teacher List</b></a></li>
-                <li><a class="navbar-brand" href="/booked-slots-students/" style="color: white;"><b>Booked Slots</b></a></li>
-                <li><a class="navbar-brand" href="/view-wallet/" style="color: white;"><b>Wallet</b></a></li>
+                <li><a class="navbar-brand" href="/teacher-profile-teacher/" style="color: white;"><b>Teacher Profile</b></a></li>
+                <li><a class="navbar-brand" href="/registered-students/" style="color: white;"><b>Student List</b></a></li>
+                <li><a class="navbar-brand" href="/event/new/{{ teacher.id }}" style="color: white;"><b>New Event</b></a></li>
+                <li><a class="navbar-brand" href="/booked-slots-teacher/" style="color: white;"><b>Booked Slots</b></a></li>
+                <li><a class="navbar-brand" href="/available-slot-teacher/" style="color: white;"><b>UnBooked Slots</b></a></li>
+                <li><a class="navbar-brand" href="/book-session/{{ teacher.id }}" style="color: white;"><b>Calendar</b></a></li>
+                <li><a class="navbar-brand" href="/view-fake-wallet/" style="color: white;"><b>Wallet</b></a></li>    
             </ul>
             <form class="form-inline my-2 my-lg-0" style="margin-left: 40px;">
                 <div class="input-group">

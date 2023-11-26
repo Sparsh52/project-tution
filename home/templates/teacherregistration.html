@@ -8,10 +8,6 @@
             {% csrf_token %}
             <div class="form-group">
                 <div class="mb-3">
-                    <label for="exampleInputEmail1" class="form-label">Phone Number</label>
-                    <input type="tel" class="form-control" name="phone" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off">
-                </div>
-                <div class="mb-3">
                     <label for="exampleInputPassword1" class="form-label">Subject-1</label>
                     <input type="text" class="form-control" name="sub1" id="exampleInputPassword1" autocomplete="off">
                 </div>
@@ -28,22 +24,59 @@
                     <input type="number" class="form-control" name="exp" id="exampleInputPassword1" autocomplete="off">
                 </div>
                 <div class="mb-3">
-                    <label for="exampleInputPassword1" class="form-label">Hourly_rate</label>
-                    <input type="number" class="form-control" name="hourly_rate" id="exampleInputPassword1" autocomplete="off">
+                    <label for="exampleInputPassword1" class="form-label">Min Hourly Rate</label>
+                    <input type="number" class="form-control" name="min_hourly_rate" id="exampleInputPassword1" autocomplete="off">
                 </div>
+                <div class="mb-3">
+                    <label for="exampleInputPassword1" class="form-label">Max Hourly Rate</label>
+                    <input type="number" class="form-control" name="max_hourly_rate" id="exampleInputPassword1" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="id_teacher_type">Teacher Type</label>
+                    <select class="form-control" id="id_teacher_type" name="teacher_type" autocomplete="off" onchange="toggleFields()">
+                        <option value="College">College</option>
+                        <option value="School">School</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="semesterField" style="display: none;">
+                    <label for="id_semester">Semester</label>
+                    <input type="number" class="form-control" name="semester" id="id_semester" min="1" max="8" autocomplete="off">
+                </div>
+
+                <div class="form-group" id="standardField" style="display: none;">
+                    <label for="id_standard">Standard</label>
+                    <input type="number" class="form-control" name="standard" id="id_standard" min="1" max="12" autocomplete="off">
+                </div>
+            <label for="exampleDataList" class="form-label">Gender</label>
+            <select class="form-control" id="id_gender_type" name="gender" autocomplete="off">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
                 <div class="mb-3">
                     <label for="exampleInputEmail1" class="form-label">Teacher Image</label>
                     <input type='file' name="teacher_image" class="form-control" autocomplete="off">
                 </div>
-                <label for="exampleDataList" class="form-label">Gender</label>
-                <select class="form-control" id="id_gender_type" name="gender" autocomplete="off">
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                </select>
             <div class="form-group">
                 <input class="btn btn-danger btn-lg btn-block" type="submit" value="Submit">
             </div>
         </form>
     </div>
 </div>
+<script>
+    function toggleFields() {
+        var teacherType = document.getElementById("id_teacher_type").value;
+        var semesterField = document.getElementById("semesterField");
+        var standardField = document.getElementById("standardField");
+
+        if (teacherType === 'College') {
+            semesterField.style.display = 'block';
+            standardField.style.display = 'none';
+        } else if (teacherType === 'School') {
+            semesterField.style.display = 'none';
+            standardField.style.display = 'block';
+        }
+    }
+    toggleFields();
+</script>
 {% endblock %}

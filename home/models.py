@@ -1,12 +1,112 @@
 from django.db import models
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.urls import reverse
 from django.http import HttpResponse
 import random
+from django.db import models
+from django.contrib.auth.models import (
+    BaseUserManager, AbstractBaseUser
+)
+from django.conf import settings
+import re
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+User = settings.AUTH_USER_MODEL
 
-# Create your models here.
+class UserManager(BaseUserManager):
+    def validate_field(self, field_name, value):
+        allowed_characters_email=re.compile('[_!#$%^&*()<>?/\|}{~:]')
+        allowed_characters_field=re.compile('[\d@_!#$%^&*()<>?/\|}{~:]')
+        if field_name=='email' and allowed_characters_email.search(value) is not None:
+            raise ValidationError(_('email contains invalid characters.'),code='invalid_characters')
+        if field_name=='name' and allowed_characters_field.search(value) is not None:
+            raise ValidationError(_(f'{field_name} contains invalid characters.'),code='invalid_characters')
+        if field_name=='phone':
+            phone_digits = ''.join(c for c in value if c.isdigit())
+            if len(phone_digits) != 10:
+                raise ValidationError(_('Phone number must contain 10 digits.'), code='invalid_phone')
+        return True
+    
+    def create_user(self, email,password=None, name=None, username=None,phone=None):
+        if not email:
+            raise ValueError('Users must have an email address')
+        if self.model.objects.filter(email=email).exists():
+            raise ValidationError(_('A user with this email address already exists.'), code='duplicate_email')
+        if self.model.objects.filter(name=name).exists():
+            raise ValidationError(_('A user with this name already exists.'), code='duplicate_name')
+        if self.model.objects.filter(username=username).exists():
+            raise ValidationError(_('A user with this username already exists.'), code='duplicate_username')
+        if self.model.objects.filter(phone=phone).exists():
+            raise ValidationError(_('A user with this phone number already exists.'), code='duplicate_phone')
+        if self.validate_field('email',email) and self.validate_field('name',name) and self.validate_field('username',username) and self.validate_field('phone',phone):
+            user = self.model(
+            email=self.normalize_email(email),
+            name=name,
+            username=username,
+            phone=phone,
+            )
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    
+    def create_staffuser(self, email, password):
+        user = self.create_user(
+            email,
+            password=password,
+        )
+        user.staff = True
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password):
+        user = self.create_user(
+            email,
+            password=password,
+        )
+        user.staff = True
+        user.admin = True
+        user.save(using=self._db)
+        return user
+
+class User(AbstractBaseUser):
+    email = models.EmailField(verbose_name='email address', max_length=255, unique=True)
+    is_active = models.BooleanField(default=True)
+    staff = models.BooleanField(default=False)
+    admin = models.BooleanField(default=False)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    username = models.CharField(max_length=255, blank=True, null=True)
+    phone=models.CharField(max_length=255, blank=True, null=True)
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    objects = UserManager()
+    
+    @property
+    def get_full_name(self):
+        return self.name
+    
+    @property
+    def get_username(self):
+        return self.username or self.email
+
+    def __str__(self):
+        return self.email
+
+    def has_perm(self, perm, obj=None):
+        return True
+
+    def has_module_perms(self, app_label):
+        return True
+
+    @property
+    def is_staff(self):
+        return self.staff
+
+   
+   
 class Wallet(models.Model):
     balance = models.IntegerField(default=0)
     def deposit(self, amount):
@@ -34,19 +134,28 @@ class Gender(models.Model):
         return self.gender
 
 class Teacher(models.Model):
+    TYPE_CHOICES = [
+        ('College', 'College'),
+        ('School', 'School'),
+    ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    phone = models.CharField(max_length=100, blank=False)
+    teacher_type=models.CharField(max_length=10, choices=TYPE_CHOICES, blank=False,null=False)
     subject1 = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='teachers_subject1')
     subject2 = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='teachers_subject2')
     subject3 = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='teachers_subject3')
     experience = models.IntegerField()
     gender = models.ForeignKey(Gender,on_delete=models.CASCADE)
-    hourly_Rate=models.IntegerField()
+    min_hourly_rate = models.IntegerField()
+    max_hourly_rate = models.IntegerField()
     teacher_image=models.ImageField(upload_to="teacher",blank=True, null=True)
     registered_students = models.ManyToManyField('Student', related_name='teachers', blank=True)
     wallet=models.ForeignKey(Wallet,related_name='wallet_teacher',on_delete=models.CASCADE,default=None)
-
+    standard_or_semester=models.IntegerField(blank=False,null=False)
     
+    @property
+    def average_hourly_rate(self):
+        return (self.min_hourly_rate + self.max_hourly_rate)//2
+
     @property
     def teacher_photo(self):
         if self.teacher_image:
@@ -61,21 +170,17 @@ class Teacher(models.Model):
         default_image = 'default_male_image.jpg' if self.gender.gender == 'Male' else 'default_female_image.png'
         return f"/media/teacher/{default_image}"
 
-    
-
-
     def __str__(self):
-        return self.user.username
+        return self.user.name
 
 class Student(models.Model):
     user=models.ForeignKey(User, on_delete=models.CASCADE)
-    phone = models.CharField(max_length=100, blank=False)
     INSTITUTION_TYPES = [
         ('School', 'School'),
         ('University', 'University'),
     ]
     institution_type = models.CharField(max_length=10, choices=INSTITUTION_TYPES, blank=False)
-    standard_or_semester=models.CharField(max_length=100,blank=False,null=False)
+    standard_or_semester=models.IntegerField(blank=False,null=False)
     institution_name=models.CharField(max_length=100,blank=False,null=False)
     gender = models.ForeignKey(Gender,on_delete=models.CASCADE)
     student_image=models.ImageField(upload_to="student",blank=True, null=True)
@@ -96,7 +201,7 @@ class Student(models.Model):
         default_image = 'default_male_image.jpg' if self.gender.gender == 'Male' else 'default_female_image.png'
         return f"/media/teacher/{default_image}"
     def __str__(self):
-        return self.user.username
+        return self.user.name
 
 
 class Feedback(models.Model):

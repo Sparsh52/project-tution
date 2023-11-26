@@ -3,12 +3,9 @@
 {% block content %}
     <div class="container mt-5">
         <form class="col-6 mx-auto card p-3 shadow-lg" action="{% url 'student_update' student_id=student.id %}" method="POST" enctype="multipart/form-data">
+            <h1 class="card-title display-6" >Student Updation-Page</h1>
             {% csrf_token %}
             <div class="form-group">
-                <div class="mb-3">
-                    <label for="exampleInputEmail1" class="form-label">Phone Number</label>
-                    <input type="tel" class="form-control" name="phone" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off">
-                </div>
                 <label for="exampleDataList" class="form-label">Gender</label>
                 <select class="form-control" aid="id_gender_type" name="gender">
                     <option value="Male">Male</option>

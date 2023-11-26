@@ -134,3 +134,4 @@ MEDIA_URL = '/media/'
 
 
 SESSION_COOKIE_SECURE = False
+AUTH_USER_MODEL = 'home.User'

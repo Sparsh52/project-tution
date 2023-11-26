@@ -2,10 +2,17 @@
 {% extends "base2.html" %}
 {% block content %}
   <div class="container mt-5">
+    {% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-danger" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% endif %}
     <div class="card shadow-lg mx-auto" style="max-width: 400px;">
       <div class="card-body text-center">
         <h1 class="card-title display-4">Deposit Money</h1>
-        <form method="post" action="{% url 'deposit_fake_money' %}">
+        <form method="post" action="{% url 'deposit_money' %}">
           {% csrf_token %}
           <div class="form-group flex-container">
             <div class="flex-item left-hand">

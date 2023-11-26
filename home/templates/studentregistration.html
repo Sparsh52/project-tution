@@ -7,10 +7,6 @@
             <h1 class="card-title display-6" >Student Registration-Page</h1>
             {% csrf_token %}
             <div class="form-group">
-                <div class="mb-3">
-                    <label for="exampleInputEmail1" class="form-label">Phone Number</label>
-                    <input type="tel" class="form-control" name="phone" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off">
-                </div>
                 <label for="exampleDataList" class="form-label">Gender</label>
                 <select class="form-control" id="id_gender_type" name="gender" autocomplete="off">
                     <option value="Male">Male</option>
@@ -21,18 +17,20 @@
                     <option value="School">School</option>
                     <option value="University">University</option>
                 </select>
+                <div class="form-group" id="semesterField" style="display: none;">
+                    <label for="id_semester">Semester</label>
+                    <input type="number" class="form-control" name="semester" id="id_semester" min="1" max="8" autocomplete="off">
+                </div>
+
+                <div class="form-group" id="standardField" style="display: none;">
+                    <label for="id_standard">Standard</label>
+                    <input type="number" class="form-control" name="standard" id="id_standard" min="1" max="12" autocomplete="off">
+                </div>
                 <div class="mb-3">
                     <label for="exampleInputEmail1" class="form-label">Institution Name</label>
                     <input type="text" class="form-control" name="institution_name" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off">
                 </div>
-                <div id="semesterField" style="display: none;">
-                    <label for="exampleDataList" class="form-label">Semester</label>
-                    <input class="form-control" type="text" name="semester" placeholder="Semester" autocomplete="off">
-                </div>
-                <div id="standardField">
-                    <label for="exampleDataList" class="form-label">Standard</label>
-                    <input class="form-control" type="text" name="standard" placeholder="Standard" autocomplete="off">
-                </div>
+
             </div>
             <div class="mb-3">
                 <label for="exampleInputEmail1" class="form-label">Student Image</label>
