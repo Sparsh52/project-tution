@@ -18,6 +18,7 @@
         <div class="row">
             
             <div class="col-lg-9 px-4 mb-5 ml-5 mt-3" margin="auto">
+                {% if teachers %}
                 {% for teacher in teachers %}
                     <div class="row search-card-result rounded shadow-lg mb-1 d-flex justify-content-center align-items-center mx-auto" style="width: 55vw;">
                         <div class="col-md-3">
@@ -51,29 +52,19 @@
                 {% endfor %}
                 <nav aria-label="Page navigation example">
                     <ul class="pagination justify-content-center">
-                        {% if teachers.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link btn btn-success" href="?page=1" style="font-weight: bold;">&laquo; first</a>
+                        {% for page in teachers.paginator.page_range %}
+                            <li class="page-item {% if page == teachers.number %}active{% endif %}">
+                                <a class="page-link btn {% if page == teachers.number %}btn-info{% else %}btn-secondary{% endif %}" href="?page={{ page }}">{{ page }}</a>
                             </li>
-                            <li class="page-item">
-                                <a class="page-link btn btn-success" href="?page={{ teachers.previous_page_number }}" style="font-weight: bold;">previous</a>
-                            </li>
-                        {% endif %}
-                        <span class="current text-muted" style="font-weight: bold;">
-                            Page {{ teachers.number }} of {{ teachers.paginator.num_pages }}.
-                        </span>
-                        {% if teachers.has_next %}
-                            <li class="page-item">
-                                <a class="page-link btn btn-danger" href="?page={{ teachers.next_page_number }}" style="font-weight: bold;">next</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link btn btn-danger" href="?page={{ teachers.paginator.num_pages }}" style="font-weight: bold;">last &raquo;</a>
-                            </li>
-                        {% endif %}
+                        {% endfor %}
                     </ul>
                 </nav>
+                {% else %}
+                <div class="alert alert-info" role="alert">
+                    <strong>No teachers available here</strong>
+                </div>
+               {% endif %}
             </div>
-
         </div>
     </div>
 </section>

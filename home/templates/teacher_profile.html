@@ -33,6 +33,9 @@
                 <div class="col-md-6 mx-auto text-center">
                     <a href="{% url 'book_session' teacher_id=teacher.id %}" class="btn btn-success">Book Session</a>
                 </div>
+                <div class="col-md-6 mx-auto text-center">
+                    <a href="{% url 'request_session' teacher_id=teacher.id %}" class="btn btn-warning">Request Session</a>
+                </div>
             </div>
         {% else %}
             <div class="row mt-3">

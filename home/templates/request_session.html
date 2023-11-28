@@ -1,0 +1,9 @@
+{% extends "base2.html" %}
+{% block content %}
+    <h2>Request a Session with {{ teacher.user.name }}</h2>
+    <form class="col-3 mx-auto card p-3 shadow-lg" method="post" action="{% url 'request_session' teacher_id=teacher.id %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit Request</button>
+    </form>
+{% endblock %}

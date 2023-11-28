@@ -3,7 +3,7 @@ from django.forms import TextInput, EmailInput
 from .models import *
 from django.forms import ModelForm, DateInput
 from django.utils.timezone import now
-
+from django.core.validators import RegexValidator, validate_email
 
 class FutureDateInput(forms.DateInput):
     input_type = 'date'
@@ -15,12 +15,28 @@ USER_CHOICES= [
     ('teacher', 'Teacher'),
     ('student', 'Student'),
     ]
+
 class UserRegistration(forms.Form):
-   name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Name', 'class': 'form-control', 'autocomplete':'off'}))
-   username=forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'UserName', 'class': 'form-control', 'autocomplete':'off'}))
-   email=forms.EmailField(widget=forms.EmailInput(attrs={'placeholder' :'Email', 'class': 'form-control','autocomplete':'off'}))
-   phone = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Phone', 'class': 'form-control', 'autocomplete': 'off'}))
-   password=forms.CharField(widget=forms.PasswordInput(attrs={'placeholder' :'Password', 'class': 'form-control','autocomplete':'off'}))
+    name = forms.CharField(
+        widget=forms.TextInput(attrs={'type':'text','placeholder': 'Name', 'class': 'form-control', 'autocomplete': 'off'}),
+        validators=[RegexValidator(r'^[a-zA-Z\s]*$', 'Enter a valid name.')]
+    )
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={'type':'text','placeholder': 'UserName', 'class': 'form-control', 'autocomplete': 'off'})
+
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'type':'email','placeholder': 'Email', 'class': 'form-control', 'autocomplete': 'off'}),
+        validators=[validate_email]
+    )
+    phone = forms.CharField(
+        widget=forms.TextInput(attrs={'type':'tel','placeholder': 'Phone', 'class': 'form-control', 'autocomplete': 'off','minlength':'10','maxlength':'10'}),
+        validators=[RegexValidator(r'^\+?1?\d{9,15}$', 'Enter a valid phone number.')]
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'type':'password','placeholder': 'Password', 'class': 'form-control', 'autocomplete': 'off'}),
+        validators=[RegexValidator(r'^(?=.*\d)(?=.*[a-zA-Z]).{8,}$', 'Password must contain at least 8 characters with at least one digit and one letter.')]
+    )
 
 class FeedbackForm(forms.ModelForm):
     class Meta:
@@ -60,3 +76,14 @@ class EventForm(ModelForm):
       self.fields['booked_by'].initial = user
      if self.instance and hasattr(self.instance, 'booked_by') and self.instance.booked_by:
       self.fields['booked_by'].disabled = True
+
+
+class SessionRequestForm(forms.ModelForm):
+    class Meta:
+        model = SessionRequest
+        exclude=['student','teacher','is_booked']
+        widgets = {
+      'start_time': FutureDateInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
+      'end_time': FutureDateInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
+      }
+        # fields = '__all__'

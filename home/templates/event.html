@@ -9,7 +9,7 @@ Event
   {% endif %}
 
  {% if user_type == 'teacher' %}
- {% if instance is not None and instance.booked_by is None %}
+ {% if instance is not None %}
    <a class="btn btn-info right" href="/delete-event/{{instance.id}}">Delete</a>
     {% endif %}
   {% endif %}

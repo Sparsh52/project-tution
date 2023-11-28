@@ -34,7 +34,11 @@ urlpatterns = [
     path('logout/',logout_page, name='logout'),
     path('view-wallet/', view_wallet, name='view_wallet'),
     path('deposit-money/', deposit_money, name='deposit_money'),
-    path('book-slot/<int:teacher_id>/<int:student_id>/<int:event_id>/', book_slot, name='book_slot')
+    path('book-slot/<int:teacher_id>/<int:student_id>/<int:event_id>/', book_slot, name='book_slot'),
+    path('request-session/<int:teacher_id>/', request_session, name='request_session'),
+    path('view-session-requests/', view_session_requests, name='view_session_requests'),
+    path('approve-session-requests/<session_id>', approve_session_requests, name='approve_session_requests'),
+    path('requested-sessions/', requested_sessions, name='requested_sessions'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

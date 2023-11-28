@@ -8,7 +8,7 @@
     
     <style>
         .navbar-brand {
-            font-size: 13px; 
+            font-size: 11px; 
             font-family: 'sans-serif';
         }
         .navbar {
@@ -60,7 +60,8 @@
                     <li><a class="navbar-brand" href="/booked-slots-teacher/" style="color: white;"><b>Booked Slots</b></a></li>
                     <li><a class="navbar-brand" href="/available-slot-teacher/" style="color: white;"><b>UnBooked Slots</b></a></li>
                     <li><a class="navbar-brand" href="/book-session/{{ teacher.id }}" style="color: white;"><b>Calendar</b></a></li>
-                    <li><a class="navbar-brand" href="/view-wallet/" style="color: white;"><b>Wallet</b></a></li>                  
+                    <li><a class="navbar-brand" href="/view-wallet/" style="color: white;"><b>Wallet</b></a></li> 
+                    <li><a class="navbar-brand" href="{% url 'view_session_requests' %}" style="color: white;"><b>View Session Requests</b></a></li>                      
                 </ul>
             </div>                           
             <li class="nav-item" style="margin-right: 20px;">
