@@ -86,6 +86,7 @@ def student_profile_teacher(request,student_id):
 @login_required(login_url='home')
 def add_feedback(request, teacher_id):
     teacher = get_object_or_404(Teacher, id=teacher_id)
+    student=Student.objects.get(user=request.user)
     if request.method == 'POST':
         comment = request.POST.get('comment')
         rating = request.POST.get('rating')
@@ -97,7 +98,7 @@ def add_feedback(request, teacher_id):
         )
         messages.success(request, 'Feedback added successfully!')
         return redirect('teacher_profile', teacher_id=teacher_id)
-    return render(request, 'add_feedback.html', {'teacher': teacher})
+    return render(request, 'add_feedback.html', {'teacher': teacher,'student':student})
 
 
 @never_cache
@@ -187,6 +188,9 @@ def register_student(request):
    reg_type = request.session.get('reg_type')
    user_id = request.session.get('user_id')
    user = User.objects.get(id=user_id)
+   if Student.objects.filter(user=user).exists():
+        messages.error(request, 'You are already registered as a student.')
+        return redirect('home')
    if request.method == 'POST':
       try:
          return extracted_from_register_student(request,user)
@@ -409,7 +413,6 @@ def event(request, teacher_id, event_id=None):
     teacher = get_object_or_404(Teacher, id=teacher_id)
     instance = get_object_or_404(Event, pk=event_id) if event_id else Event()
     student = None
-    # Check user type
     try:
         student = Student.objects.get(user=request.user)
         user_type = "student"
@@ -442,8 +445,13 @@ def event(request, teacher_id, event_id=None):
         start_time_obj = datetime.strptime(start_time_str, "%H:%M")
         end_date_obj = datetime.strptime(end_date_str, "%Y-%m-%d")
         end_time_obj = datetime.strptime(end_time_str, "%H:%M")
+        cost=data['event_cost']
+        if int(cost)<0:
+            messages.error(request,"Event cost cannot be negative")
+            return redirect(reverse('event_new', kwargs={'teacher_id': teacher.id}))
         if Event.objects.filter(Q(start_time__date=start_date_obj,end_time__date=end_date_obj) &
-                                Q(start_time__time__lte=start_time_obj,end_time__time__gte=end_time_obj)).exists():
+                                (Q(start_time__time__lte=start_time_obj,end_time__time__gte=end_time_obj)|
+                                Q(start_time__time__gte=start_time_obj,end_time__time__lte=end_time_obj))).exists():
                 print("Not Possible")
                 messages.error(request,"Not Possible")
                 return redirect(reverse('event_new', kwargs={'teacher_id': teacher.id}))
@@ -498,8 +506,10 @@ def delete_event(request, event_id):
         if event.booked_by is not None and event.created_by is not None:
             teacher = event.created_by
             student = event.booked_by
-            event_cost=event.duration*teacher.average_hourly_rate
+            event_cost=event.duration*event.event_cost
+            print(student.wallet.balance)
             student.wallet.deposit(event_cost)
+            print(student.wallet.balance)
             print(teacher.wallet.balance)
             teacher.wallet.withdraw(event_cost)
             print(teacher.wallet.balance)
@@ -690,7 +700,7 @@ def book_slot(request, teacher_id, student_id, event_id):
     teacher = Teacher.objects.get(id=teacher_id)
     student = Student.objects.get(id=student_id)
     event = Event.objects.get(id=event_id)
-    event_cost = event.duration * teacher.average_hourly_rate
+    event_cost = event.duration * event.event_cost
     if student.wallet.balance >= event_cost:
         student.wallet.withdraw(event_cost)
         teacher.wallet.deposit(event_cost)
@@ -710,13 +720,24 @@ def request_session(request, teacher_id):
     if request.method == 'POST':
         form = SessionRequestForm(request.POST)
         if form.is_valid():
+            cost=form.cleaned_data['requested_cost']
+            if cost<0:
+                messages.error(request,"Negative Cost")
+                return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
+            if student.wallet.balance-cost<=0:
+                messages.error(request,"Plz refill your wallet balance")
+                return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
             session_request = form.save(commit=False)
             session_request.student = student
             session_request.teacher = teacher
             session_request.save()
             return redirect(reverse('teacher_profile', kwargs={'teacher_id': teacher.id}))
     else:
-        form = SessionRequestForm()
+        # print(teacher.title_choices)
+        initial_data = {
+            'instance': teacher,
+        }
+        form = SessionRequestForm(**initial_data)
     return render(request, 'request_session.html', {'form': form, 'teacher': teacher,'student':student})
 
 @never_cache
@@ -731,10 +752,10 @@ def view_session_requests(request):
 @login_required(login_url='home')
 def approve_session_requests(request,session_id):
     session=SessionRequest.objects.get(id=session_id)
-    event=Event.objects.create(created_by=session.teacher,booked_by=session.student,start_time=session.start_time,end_time=session.end_time,description=session.message,title=session.title)
+    event=Event.objects.create(created_by=session.teacher,booked_by=session.student,start_time=session.start_time,end_time=session.end_time,description=session.message,title=session.title,event_cost=session.requested_cost)
     teacher=event.created_by
     student=event.booked_by
-    event_cost = event.duration * teacher.average_hourly_rate
+    event_cost = event.duration * event.event_cost
     if student.wallet.balance>=event_cost:
         print(student.wallet.balance)
         student.wallet.withdraw(event_cost)
@@ -755,3 +776,11 @@ def requested_sessions(request):
     student=Student.objects.get(user=request.user)
     sessions=SessionRequest.objects.filter(student=student)
     return render(request, 'view_session_requests_student.html', {'session_requests': sessions,'student':student})
+
+
+@never_cache
+@login_required(login_url='home')
+def delete_request(request,session_id):
+    session=SessionRequest.objects.filter(id=session_id)
+    session.delete()
+    return redirect('/view-session-requests/')

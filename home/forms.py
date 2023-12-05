@@ -19,10 +19,11 @@ USER_CHOICES= [
 class UserRegistration(forms.Form):
     name = forms.CharField(
         widget=forms.TextInput(attrs={'type':'text','placeholder': 'Name', 'class': 'form-control', 'autocomplete': 'off'}),
-        validators=[RegexValidator(r'^[a-zA-Z\s]*$', 'Enter a valid name.')]
+        validators=[RegexValidator(r'^[a-zA-Z\s]*$', 'Enter a valid username.')]
     )
     username = forms.CharField(
-        widget=forms.TextInput(attrs={'type':'text','placeholder': 'UserName', 'class': 'form-control', 'autocomplete': 'off'})
+        widget=forms.TextInput(attrs={'type':'text','placeholder': 'UserName', 'class': 'form-control', 'autocomplete': 'off'}),
+        validators=[RegexValidator(r'^[0-9a-zA-Z\s]*$', 'Enter a valid username.')]
 
     )
     email = forms.EmailField(
@@ -55,27 +56,26 @@ class EventForm(ModelForm):
     # exclude=['created_by','booked_by']
 
   def __init__(self, request,user,user_type,*args, **kwargs):
-     print(user)
-     super(EventForm, self).__init__(*args, **kwargs)
-     # input_formats parses HTML5 datetime-local input to datetime field
-     self.fields['start_time'].input_formats = ('%Y-%m-%dT%H:%M',)
-     self.fields['end_time'].input_formats = ('%Y-%m-%dT%H:%M',)
-     if user_type == 'teacher':
-      self.fields['booked_by'].disabled = True
-      self.fields['created_by'].disabled = True
-     elif user_type == 'student':
-       self.fields['created_by'].disabled = True
+      print(user)
+      super(EventForm, self).__init__(*args, **kwargs)
+      self.fields['start_time'].input_formats = ('%Y-%m-%dT%H:%M',)
+      self.fields['end_time'].input_formats = ('%Y-%m-%dT%H:%M',)
+      if user_type == 'teacher':
        self.fields['booked_by'].disabled = True
-       self.fields['title'].disabled = True
-       self.fields['start_time'].disabled = True
-       self.fields['end_time'].disabled = True
-       self.fields['description'].disabled = True
-       
-     if self.instance and hasattr(self.instance, 'created_by') and self.instance.created_by:
-      self.fields['created_by'].disabled = True
-      self.fields['booked_by'].initial = user
-     if self.instance and hasattr(self.instance, 'booked_by') and self.instance.booked_by:
-      self.fields['booked_by'].disabled = True
+       self.fields['created_by'].disabled = True
+      elif user_type == 'student':
+        self.fields['created_by'].disabled = True
+        self.fields['booked_by'].disabled = True
+        self.fields['title'].disabled = True
+        self.fields['start_time'].disabled = True
+        self.fields['end_time'].disabled = True
+        self.fields['description'].disabled = True
+
+      if self.instance and hasattr(self.instance, 'created_by') and self.instance.created_by:
+       self.fields['created_by'].disabled = True
+       self.fields['booked_by'].initial = user
+      if self.instance and hasattr(self.instance, 'booked_by') and self.instance.booked_by:
+       self.fields['booked_by'].disabled = True
 
 
 class SessionRequestForm(forms.ModelForm):
@@ -87,3 +87,16 @@ class SessionRequestForm(forms.ModelForm):
       'end_time': FutureDateInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
       }
         # fields = '__all__'
+    def __init__(self, *args, **kwargs):
+        super(SessionRequestForm, self).__init__(*args, **kwargs)
+        if instance := kwargs.get('instance'):
+            print(instance.title_choices)
+            for field_name, field in self.fields.items():
+               print(field_name)
+               print(self.fields.items())
+               field.widget.attrs['class'] = 'form-control'
+            self.fields['title']=forms.ChoiceField(choices=instance.title_choices)
+            self.fields['title'].widget.attrs['class'] = 'form-control'
+            self.fields['title'].choices = instance.title_choices
+    
+    

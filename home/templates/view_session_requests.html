@@ -1,4 +1,3 @@
-<!-- view_session_requests.html -->
 
 {% extends "base5.html" %}
 {% block content %}
@@ -14,8 +13,11 @@
                             <div class="ml-3">
                                 <h5 class="card-title">{{ request.student.user.name }} requested a session</h5>
                                 <p class="card-text">Date and Time: {{ request.start_time }} to {{ request.end_time }}</p>
+                                <p class="card-text">{{ request.title }}</p>
                                 <p class="card-text">{{ request.message }}</p>
+                                <p class="card-text"> &#8377;{{ request.requested_cost }}</p>
                                 <a href="{% url 'approve_session_requests' session_id=request.id %}" class="btn btn-warning">Approve</a>
+                                <a href="/delete-request/{{ request.id }}" class="btn btn-danger">Delete</a>
                             </div>
                         </div>
                     </div>

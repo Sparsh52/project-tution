@@ -12,7 +12,9 @@
                             <div class="ml-3">
                                 <h5 class="card-title">{{ request.student.user.name }} sent request to {{ request.teacher.user.name }}</h5>
                                 <p class="card-text">Date and Time: {{ request.start_time }} to {{ request.end_time }}</p>
+                                <p class="card-text">{{ request.title }}</p>
                                 <p class="card-text">{{ request.message }}</p>
+                                <p class="card-text">&#8377;{{ request.requested_cost }}</p>
                             </div>
                         </div>
                     </div>

@@ -24,15 +24,15 @@
                         {% csrf_token %}
                         <div class="col-md-12">
                             <label for="hourlyPrice"> Maximum Hourly Price</label>
-                            <input type="number" name="hourlyPrice" id="hourlyPrice" class="form-control">
+                            <input type="number" name="hourlyPrice" id="hourlyPrice" class="form-control" min="0">
                         </div><br>
                         <div class="col-md-12">
                             <label for="experience">Minimum Experience</label><br>
-                            <input type="number" name="experience" id="experience" class="form-control">
+                            <input type="number" name="experience" id="experience" class="form-control" min="0">
                         </div><br>
                         <div class="col-md-12">
                             <label for="subject">Subject</label>
-                            <input type="text" name="subject" id="subject" class="form-control">
+                            <input type="text" name="subject" id="subject" class="form-control" pattern="[a-zA-Z ]*" autocomplete="off">
                         </div><br>
                         <div class="col-md-12">
                             <label for="teacherType">Teacher Type</label>

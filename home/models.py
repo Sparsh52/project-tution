@@ -53,9 +53,9 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     staff = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)
-    name = models.CharField(max_length=255, unique=True,blank=True,null=True)
-    username = models.CharField(max_length=255, unique=True,blank=True, null=True)
-    phone=models.CharField(max_length=255, unique=True,blank=True, null=True)
+    name = models.CharField(max_length=255,blank=False,default="NA")
+    username = models.CharField(max_length=255, unique=True,blank=False)
+    phone=models.CharField(max_length=255, unique=True,blank=False,default="NA")
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
@@ -139,6 +139,15 @@ class Teacher(models.Model):
             return self.teacher_image.url
         default_image = 'default_male_image.jpg' if self.gender.gender == 'Male' else 'default_female_image.png'
         return f"/media/teacher/{default_image}"
+    
+    
+    @property
+    def title_choices(self):
+        return [
+            (self.subject1, self.subject1),
+            (self.subject2, self.subject2),
+            (self.subject3, self.subject3),
+        ]
 
     def __str__(self):
         return self.user.name
@@ -191,6 +200,7 @@ class Event(models.Model):
     description = models.TextField()
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
+    event_cost=models.IntegerField(default=0)
     
     def get_available_url(self, user_type):
         if user_type != 'student':
@@ -205,6 +215,8 @@ class Event(models.Model):
     @property
     def duration(self):
         return (self.end_time - self.start_time).seconds // 3600
+    
+        
 
 class SessionRequest(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='session_requests')
@@ -213,6 +225,7 @@ class SessionRequest(models.Model):
     end_time = models.DateTimeField(blank=True, null=True)
     title=models.CharField(max_length=200,blank=True)
     message = models.TextField()
+    requested_cost=models.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.student.user.name} requested a session with {self.teacher.user.name} on {self.start_time} to {self.end_time}"
+        return f"{self.student.user.username} requested a session with {self.teacher.user.username} on {self.start_time} to {self.end_time}"

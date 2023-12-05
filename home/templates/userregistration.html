@@ -9,7 +9,7 @@
         {{form.as_p}}
         <div class="form-group">
             <label for="exampleDataList" class="form-label">What do you want to register as?</label>
-            <input class="form-control" list="datalistOptions" id="exampleDataList" name="reg_type" placeholder="Type to search..." onchange="updateHiddenField()" autocomplete="off">
+            <input class="form-control" list="datalistOptions" id="exampleDataList" name="reg_type" placeholder="Type to search..." onchange="updateHiddenField()" autocomplete="off" required>
             <datalist id="datalistOptions">
                 <option value="Teacher">Teacher</option>
                 <option value="Student">Student</option>

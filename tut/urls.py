@@ -39,6 +39,7 @@ urlpatterns = [
     path('view-session-requests/', view_session_requests, name='view_session_requests'),
     path('approve-session-requests/<session_id>', approve_session_requests, name='approve_session_requests'),
     path('requested-sessions/', requested_sessions, name='requested_sessions'),
+    path('delete-request/<session_id>', delete_request, name='delete_request'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
