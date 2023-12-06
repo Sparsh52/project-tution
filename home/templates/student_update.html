@@ -7,26 +7,26 @@
             {% csrf_token %}
             <div class="form-group">
                 <label for="exampleDataList" class="form-label">Gender</label>
-                <select class="form-control" aid="id_gender_type" name="gender" required>
+                <select class="form-control" aid="id_gender_type" name="gender">
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
                 </select>
                 <label for="exampleDataList" class="form-label">Institution Type</label>
-                <select class="form-control" id="id_institution_type" name="ins_type" required>
+                <select class="form-control" id="id_institution_type" name="ins_type">
                     <option value="School">School</option>
                     <option value="University">University</option>
                 </select>
                 <div class="mb-3">
                     <label for="exampleInputEmail1" class="form-label">Institution Name</label>
-                    <input type="text" class="form-control" name="institution_name" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off" pattern="[a-zA-Z ]*" required>
+                    <input type="text" class="form-control" name="institution_name" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off" pattern="[a-zA-Z ]*">
                 </div>
                 <div id="semesterField" style="display: none;">
                     <label for="exampleDataList" class="form-label">Semester</label>
-                    <input class="form-control" type="number" name="semester" placeholder="Semester" autocomplete="off" min="1" required>
+                    <input class="form-control" type="number" name="semester" placeholder="Semester" autocomplete="off" min="1">
                 </div>
                 <div id="standardField">
                     <label for="exampleDataList" class="form-label">Standard</label>
-                    <input class="form-control" type="number" name="standard" placeholder="Standard" autocomplete="off" min="1" required>
+                    <input class="form-control" type="number" name="standard" placeholder="Standard" autocomplete="off" min="1">
                 </div>
             </div>
             <div class="mb-3">

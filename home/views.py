@@ -24,15 +24,16 @@ from django.core.paginator import Paginator
 
 @never_cache
 def home(request):
+    next_page = request.GET.get('next', request.META.get('HTTP_REFERER'))
+    print(next_page)
     if request.user.is_authenticated and isinstance(request.user, User):
         try:
-            # Attempt to get the Teacher profile
             teacher = Teacher.objects.get(user=request.user)
-            return redirect('/teacher-profile-teacher/')
+            return redirect('next_page')
         except Teacher.DoesNotExist:
             try:
                 student = Student.objects.get(user=request.user)
-                return redirect('/student-profile/')
+                return redirect('next_page')
             except Student.DoesNotExist:
                 messages.error(request, 'Invalid user type')
                 return redirect('home')
@@ -50,11 +51,11 @@ def home(request):
             login(request, user)
             try:
                 teacher = Teacher.objects.get(user=user)
-                return redirect('/teacher-profile-teacher/')
+                return redirect(next_page)
             except Teacher.DoesNotExist:
                 try:
                     student = Student.objects.get(user=user)
-                    return redirect('/student-profile/')
+                    return redirect(next_page)
                 except Student.DoesNotExist:
                     messages.error(request, 'Invalid user type')
                     return redirect('home')
@@ -436,7 +437,19 @@ def event(request, teacher_id, event_id=None):
     form = EventForm(**form_params)
     if request.POST and form.is_valid():
         data = request.POST
-        print(data)
+        start_time=data['start_time']
+        end_time=data['end_time']
+        print(start_time)
+        print(end_time)
+        if len(start_time)==0:
+            messages.error(request,"Start date cannot be empty")
+            return redirect(reverse('event_new', kwargs={'teacher_id': teacher.id}))
+        if len(end_time)==0:
+            messages.error(request,"end date cannot be empty")
+            return redirect(reverse('event_new', kwargs={'teacher_id': teacher.id}))
+        if start_time>end_time:
+            messages.error(request,"Start date cannot be more than end date")
+            return redirect(reverse('event_new', kwargs={'teacher_id': teacher.id}))
         start_date_str = data['start_time'].split('T')[0]  
         start_time_str = data['start_time'].split('T')[1]
         end_date_str = data['end_time'].split('T')[0]  
@@ -721,6 +734,17 @@ def request_session(request, teacher_id):
         form = SessionRequestForm(request.POST)
         if form.is_valid():
             cost=form.cleaned_data['requested_cost']
+            start_time=form.cleaned_data['start_time']
+            end_time=form.cleaned_data['end_time']
+            if start_time is None:
+                messages.error(request,"Start date cannot be empty")
+                return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
+            if end_time is None:
+                messages.error(request,"end date cannot be empty")
+                return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
+            if start_time>end_time:
+                messages.error(request,"Start date cannot be more than end date")
+                return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
             if cost<0:
                 messages.error(request,"Negative Cost")
                 return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
