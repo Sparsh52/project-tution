@@ -14,11 +14,14 @@ import re
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator
+import uuid 
 User = settings.AUTH_USER_MODEL
 
 class UserManager(BaseUserManager):    
     def create_user(self, email,password=None, name=None, username=None,phone=None):
+        user_uuid = str(uuid.uuid4())
         user = self.model(
+            id=user_uuid,
             email=self.normalize_email(email),
             name=name,
             username=username,
@@ -38,10 +41,13 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password):
+    def create_superuser(self, email, password,name,username,phone):
         user = self.create_user(
             email,
             password=password,
+            name=name,
+            username=username,
+            phone=phone
         )
         user.staff = True
         user.admin = True
@@ -49,6 +55,7 @@ class UserManager(BaseUserManager):
         return user
 
 class User(AbstractBaseUser):
+    id=models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False) 
     email = models.EmailField(verbose_name='email address', max_length=255, unique=True)
     is_active = models.BooleanField(default=True)
     staff = models.BooleanField(default=False)
@@ -57,7 +64,7 @@ class User(AbstractBaseUser):
     username = models.CharField(max_length=255, unique=True,blank=False)
     phone=models.CharField(max_length=255, unique=True,blank=False,default="NA")
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['name','username','phone']
 
     objects = UserManager()
     def get_full_name(self):
@@ -108,6 +115,7 @@ class Teacher(models.Model):
         ('College', 'College'),
         ('School', 'School'),
     ]
+    id=models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False) 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     teacher_type=models.CharField(max_length=10, choices=TYPE_CHOICES, blank=False,null=False)
     subject1 = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='teachers_subject1')
@@ -153,6 +161,7 @@ class Teacher(models.Model):
         return self.user.name
 
 class Student(models.Model):
+    id=models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False) 
     user=models.ForeignKey(User, on_delete=models.CASCADE)
     INSTITUTION_TYPES = [
         ('School', 'School'),
@@ -194,6 +203,7 @@ class Feedback(models.Model):
         return f"Feedback for {self.teacher.user.username} by {self.student.username}"
 
 class Event(models.Model):
+    id=models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False) 
     created_by=models.ForeignKey(Teacher,on_delete=models.CASCADE)
     booked_by=models.ForeignKey(Student,on_delete=models.CASCADE,blank=True,null=True)
     title = models.CharField(max_length=200)
@@ -219,6 +229,7 @@ class Event(models.Model):
         
 
 class SessionRequest(models.Model):
+    id=models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False) 
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='session_requests')
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='received_requests')
     start_time = models.DateTimeField(blank=True, null=True)

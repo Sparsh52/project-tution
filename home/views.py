@@ -21,25 +21,17 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.http import HttpResponseForbidden
 from django.core.paginator import Paginator
+import uuid
+from .decorators import *
 
 @never_cache
+@logindec
 def home(request):
     next_page = request.GET.get('next', request.META.get('HTTP_REFERER'))
-    print(next_page)
-    if request.user.is_authenticated and isinstance(request.user, User):
-        try:
-            teacher = Teacher.objects.get(user=request.user)
-            return redirect('next_page')
-        except Teacher.DoesNotExist:
-            try:
-                student = Student.objects.get(user=request.user)
-                return redirect('next_page')
-            except Student.DoesNotExist:
-                messages.error(request, 'Invalid user type')
-                return redirect('home')
     if request.method == "POST":
         email = request.POST.get('email')
         password = request.POST.get('password')
+        print(email,password)
         if not User.objects.filter(email=email).exists():
             messages.error(request, 'Invalid Username')
             return redirect("/register/")
@@ -48,17 +40,27 @@ def home(request):
             messages.error(request, 'Invalid Password')
             return redirect('home')
         else:
+            print("Before Login")
+            print(user)
             login(request, user)
             try:
+                print("LOL6")
                 teacher = Teacher.objects.get(user=user)
-                return redirect(next_page)
+                if next_page is not None and next_page!='http://127.0.0.1:8000/':
+                    return redirect(next_page)
+                else:
+                    return redirect('teacher-profile-teacher/')
             except Teacher.DoesNotExist:
                 try:
+                    print("LOL5")
                     student = Student.objects.get(user=user)
-                    return redirect(next_page)
+                    if next_page is not None and next_page!='http://127.0.0.1:8000/':
+                        return redirect(next_page)
+                    else:
+                        return redirect('/student-profile/')
                 except Student.DoesNotExist:
                     messages.error(request, 'Invalid user type')
-                    return redirect('home')
+                    return render(request,"login.html")
     return render(request, "login.html")
 
 
@@ -131,7 +133,7 @@ def teachers_list(request):
       username_filter = Q(user__username__icontains=search_query)
       queryset = queryset.filter(subjects_filter | username_filter)
    if hourly_price:
-      queryset = queryset.filter(min_hourly_rate__lte=hourly_price, max_hourly_rate__gte=hourly_price)
+      queryset = queryset.filter(min_hourly_rate__lte=hourly_price)
    if experience:
       queryset = queryset.filter(experience__gte=experience)
    if subject:
@@ -156,6 +158,7 @@ def register(request):
       data = request.POST
       if fm.is_valid():
          try:
+            print("In register")
             return extracted_from_home(fm, data, request)
          except Exception as e:
             print("Something Wrong happend",e)
@@ -204,6 +207,7 @@ def register_student(request):
 def teacher_profile(request, teacher_id):
     student = Student.objects.get(user=request.user)
     teacher = get_object_or_404(Teacher, id=teacher_id)
+    print(teacher.id)
     feedbacks = teacher.feedbacks.all()
     context = {
         'teacher': teacher,
@@ -214,6 +218,7 @@ def teacher_profile(request, teacher_id):
 
 
 def extracted_from_home(fm, data, request):
+#    print('User in extracted_from_home:', user)
    name = fm.cleaned_data['name']
    username = fm.cleaned_data['username']
    email = fm.cleaned_data['email']
@@ -229,7 +234,8 @@ def extracted_from_home(fm, data, request):
     )
 
 def extracted_from_register_Teacher(request, user):
-    print('User:', user)
+    teacher_uuid = str(uuid.uuid4())
+    print('User in extracted_from_register_Teacher:', user)
     wallet = Wallet.objects.create(balance=0.00)
     data = request.POST
     min_hourly_Rate = data['min_hourly_rate']
@@ -262,6 +268,7 @@ def extracted_from_register_Teacher(request, user):
 
         if img is not None:
             teacher = Teacher.objects.create(
+                id=teacher_uuid,
                 user=user,
                 subject1=sub_instance_1,
                 subject2=sub_instance_2,
@@ -277,6 +284,7 @@ def extracted_from_register_Teacher(request, user):
             )
         else:
             teacher = Teacher.objects.create(
+                id=teacher_uuid,
                 user=user,
                 subject1=sub_instance_1,
                 subject2=sub_instance_2,
@@ -299,6 +307,7 @@ def extracted_from_register_Teacher(request, user):
 
 def extracted_from_register_student(request, user):
      print('User:', user)
+     student_uuid = str(uuid.uuid4())
      try:
         print("Received request to register a student.")
         wallet = Wallet.objects.create(balance=0.00)
@@ -312,6 +321,7 @@ def extracted_from_register_student(request, user):
         if img is not None:
             print("Creating student with image.")
             student = Student.objects.create(
+                id=student_uuid,
                 user=user,
                 institution_type=ins_type,
                 standard_or_semester=standard_or_semester,
@@ -323,6 +333,7 @@ def extracted_from_register_student(request, user):
         else:
             print("Creating student without image.")
             student = Student.objects.create(
+                id=student_uuid,
                 user=user,
                 institution_type=ins_type,
                 standard_or_semester=standard_or_semester,
@@ -340,26 +351,30 @@ def extracted_from_register_student(request, user):
    
 @never_cache
 @login_required(login_url='home')
-def book_session(request,teacher_id):
-   try:
-      student = Student.objects.get(user=request.user)
-      user_type = "student"
-   except Student.DoesNotExist:
-      user_type = "teacher"
-   teacher = get_object_or_404(Teacher, id=teacher_id)
-   month_param = request.GET.get('month', None)
-   d = get_date(month_param)
-   cal = Calendar(d.year, d.month)
-   html_cal = cal.formatmonth(request.user,user_type,withyear=True)
-   context = {
-        'calendar': mark_safe(html_cal),
-        'prev_month': prev_month(d),
-        'next_month': next_month(d),
-        'teacher':teacher,
-        'user_type':user_type
-    }
-   return render(request, 'calendar.html', context)
-
+def book_session(request, teacher_id):
+    try:
+        student = Student.objects.get(user=request.user)
+        user_type = "student"
+    except Student.DoesNotExist:
+        user_type = "teacher"
+    try:
+        teacher = get_object_or_404(Teacher, id=teacher_id)
+        month_param = request.GET.get('month', None)
+        d = get_date(month_param)
+        cal = Calendar(d.year, d.month)
+        html_cal = cal.formatmonth(request.user, user_type, withyear=True)
+        context = {
+            'calendar': mark_safe(html_cal),
+            'prev_month': prev_month(d),
+            'next_month': next_month(d),
+            'teacher': teacher,
+            'user_type': user_type
+        }
+        return render(request, 'calendar.html', context)
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        messages.error(request, 'An error occurred. Please try again later.')
+        return render(request, 'error.html')
 
 def prev_month(d):
     first = d.replace(day=1)
