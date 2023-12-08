@@ -683,12 +683,12 @@ def deposit_money(request):
 
     if request.method == 'POST':
         print(request.POST)
-        # credit_card = request.POST.get('credit_card')
+        credit_card = request.POST.get('credit_card')
         # cvv = request.POST.get('cvv')
         expiration_date = request.POST.get('expiration_date')
-        # if not is_valid_credit_card(credit_card):
-        #     messages.error(request, "Invalid credit card number")
-        #     return redirect(reverse('deposit_money'))
+        if not is_valid_credit_card(credit_card):
+            messages.error(request, "Invalid credit card number")
+            return redirect(reverse('deposit_money'))
         # if not is_valid_cvv(cvv):
         #     messages.error(request, "Invalid CVV")
         #     return redirect(reverse('deposit_money'))
@@ -703,8 +703,21 @@ def deposit_money(request):
         return redirect(reverse('view_wallet'))
     return render(request, 'deposit_fake_money.html', context)
 
-# def is_valid_credit_card(credit_card):
-#     return len(credit_card) == 16 and credit_card.isdigit()
+def is_valid_credit_card(credit_card):
+    card_number = int(credit_card)
+    idx = 0
+    total_sum = 0
+    while card_number > 0:
+        digit = card_number % 10
+        if idx%2==1: 
+            digit *= 2
+            if digit >= 10:
+                digit = digit % 10 + digit // 10
+        total_sum += digit
+        card_number //= 10
+        idx += 1
+    return bool(total_sum % 10 == 0 and len(credit_card) == 16 and credit_card.isdigit())
+
 
 # def is_valid_cvv(cvv):
 #     return len(cvv) == 3 and cvv.isdigit()
