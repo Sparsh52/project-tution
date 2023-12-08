@@ -23,6 +23,7 @@
     <input type="password" name="password" class="form-control" id="exampleInputPassword1" autocomplete="off">
     </div>
     <p>Don't Have Account<a href="{% url 'register' %}"> Register </a> </p>
+    <p>Forgot your password<a href="{% url 'password_reset' %}"> Reset </a> </p>
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 {% endblock %}

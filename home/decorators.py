@@ -1,3 +1,4 @@
+import contextlib
 from .models import Teacher, Student
 from django.shortcuts import render, redirect
 from functools import wraps
@@ -17,16 +18,13 @@ def logindec(view_func):
                 else:
                     return redirect('/teacher-profile-teacher/')
             except Teacher.DoesNotExist:
-                try:
+                with contextlib.suppress(Student.DoesNotExist):
                     student = Student.objects.get(user=request.user)
                     if student and next_page:
                         print(f"In Student {student}")
                         return redirect(next_page)
                     else:
                         return redirect('/student-profile/')
-                except Student.DoesNotExist:
-                    messages.error(request, 'You are not a registered user.')
-                    return redirect('/')
         return view_func(request, *args, **kwargs)
 
     return wrapper

@@ -23,6 +23,7 @@ from django.http import HttpResponseForbidden
 from django.core.paginator import Paginator
 import uuid
 from .decorators import *
+from django.template.loader import render_to_string
 
 @never_cache
 @logindec
@@ -477,7 +478,7 @@ def event(request, teacher_id, event_id=None):
         if int(cost)<0:
             messages.error(request,"Event cost cannot be negative")
             return redirect(reverse('event_new', kwargs={'teacher_id': teacher.id}))
-        if Event.objects.filter(Q(start_time__date=start_date_obj,end_time__date=end_date_obj) &
+        if Event.objects.filter(Q(start_time__date__gte=start_date_obj,end_time__date__lte=end_date_obj) &
                                 (Q(start_time__time__lte=start_time_obj,end_time__time__gte=end_time_obj)|
                                 Q(start_time__time__gte=start_time_obj,end_time__time__lte=end_time_obj))).exists():
                 print("Not Possible")
@@ -751,6 +752,12 @@ def request_session(request, teacher_id):
             cost=form.cleaned_data['requested_cost']
             start_time=form.cleaned_data['start_time']
             end_time=form.cleaned_data['end_time']
+            print(start_time)
+            print(end_time)
+            print(start_time.date())
+            print(end_time.date())
+            print(start_time.time())
+            print(end_time.time())
             if start_time is None:
                 messages.error(request,"Start date cannot be empty")
                 return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
@@ -765,6 +772,18 @@ def request_session(request, teacher_id):
                 return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
             if student.wallet.balance-cost<=0:
                 messages.error(request,"Plz refill your wallet balance")
+                return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
+            # filtered_sessions=SessionRequest.objects.filter(Q(start_time__date__gte=start_time.date(),end_time__date__lte=end_time.date()) &
+            #                     (Q(start_time__time__lte=start_time.time(),end_time__time__gte=end_time.time())|
+            #                     Q(start_time__time__gte=start_time.time(),end_time__time__lte=end_time.time())))
+            # values_list = filtered_sessions.values()
+            # for session_values in values_list:
+            #     print(session_values)
+            if SessionRequest.objects.filter(Q(start_time__date__gte=start_time.date(),end_time__date__lte=end_time.date()) &
+                                (Q(start_time__time__lte=start_time.time(),end_time__time__gte=end_time.time())|
+                                Q(start_time__time__gte=start_time.time(),end_time__time__lte=end_time.time()))).exists():
+                print("Not Possible")
+                messages.error(request,"Already a session exist")
                 return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
             session_request = form.save(commit=False)
             session_request.student = student
@@ -823,3 +842,4 @@ def delete_request(request,session_id):
     session=SessionRequest.objects.filter(id=session_id)
     session.delete()
     return redirect('/view-session-requests/')
+
