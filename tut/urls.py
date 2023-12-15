@@ -26,7 +26,7 @@ urlpatterns = [
     #Teacher-related-stuff
     path('teacher-profile-teacher/',teacher_profile_teacher,name='teacher_profile_teacher'),
     path('registered-students/',registered_students_teacher,name='registered_students_teacher'),
-    path('student-profile-teacher/<int:student_id>',student_profile_teacher,name='student_profile_teacher'),
+    path('student-profile-teacher/<student_id>',student_profile_teacher,name='student_profile_teacher'),
     path('available-slot-teacher/',available_slot_teacher,name='available_slot_teacher'),
     path('booked-slots-teacher/',booked_slots_teacher,name='booked_slots_teacher'),
     path('delete-event/<event_id>/',delete_event, name='delete_event'),

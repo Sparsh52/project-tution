@@ -18,7 +18,7 @@ import uuid
 User = settings.AUTH_USER_MODEL
 
 class UserManager(BaseUserManager):    
-    def create_user(self, email,password=None, name=None, username=None,phone=None):
+    def create_user(self, email,password=None, name=None, username=None,phone=None,room=None):
         user_uuid = str(uuid.uuid4())
         user = self.model(
             id=user_uuid,
@@ -26,6 +26,7 @@ class UserManager(BaseUserManager):
             name=name,
             username=username,
             phone=phone,
+            room=room
             )
         user.set_password(password)
         user.save(using=self._db)
@@ -54,6 +55,12 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+
+class NotifyRoom(models.Model):
+    name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name
+
 class User(AbstractBaseUser):
     id=models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False) 
     email = models.EmailField(verbose_name='email address', max_length=255, unique=True)
@@ -63,6 +70,7 @@ class User(AbstractBaseUser):
     name = models.CharField(max_length=255,blank=False,default="NA")
     username = models.CharField(max_length=255, unique=True,blank=False)
     phone=models.CharField(max_length=255, unique=True,blank=False,default="NA")
+    room = models.ForeignKey(NotifyRoom,null=True, blank=True,on_delete=models.SET_NULL)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name','username','phone']
 
@@ -240,3 +248,11 @@ class SessionRequest(models.Model):
 
     def __str__(self):
         return f"{self.student.user.username} requested a session with {self.teacher.user.username} on {self.start_time} to {self.end_time}"
+    
+class Notification(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE,blank=True,null=True)
+    message = models.CharField(max_length=100)
+    is_seen=models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.message

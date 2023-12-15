@@ -220,19 +220,21 @@ def teacher_profile(request, teacher_id):
 
 def extracted_from_home(fm, data, request):
 #    print('User in extracted_from_home:', user)
-   name = fm.cleaned_data['name']
-   username = fm.cleaned_data['username']
-   email = fm.cleaned_data['email']
-   password = fm.cleaned_data['password']
-   reg_type = data['reg_type']
-   phone=data['phone']
-   user = User.objects.create_user(name=name, username=username,email=email,phone=phone,password=password)
-   request.session['reg_type'] = reg_type
-   request.session['user_id'] = user.id
-   return(
-            redirect('/register-teacher/') if reg_type == "Teacher"
-            else redirect('/register-student/')
-    )
+    name = fm.cleaned_data['name']
+    username = fm.cleaned_data['username']
+    email = fm.cleaned_data['email']
+    password = fm.cleaned_data['password']
+    reg_type = data['reg_type']
+    phone=data['phone']
+    room = f"{name}_room_"
+    notify_room=NotifyRoom.objects.create(name=room)
+    user = User.objects.create_user(name=name, username=username,email=email,phone=phone,password=password,room=notify_room)
+    request.session['reg_type'] = reg_type
+    request.session['user_id'] = user.id
+    return(
+             redirect('/register-teacher/') if reg_type == "Teacher"
+             else redirect('/register-student/')
+     )
 
 def extracted_from_register_Teacher(request, user):
     teacher_uuid = str(uuid.uuid4())

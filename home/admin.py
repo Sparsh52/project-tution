@@ -17,7 +17,7 @@ class FeedbackAdmin(admin.ModelAdmin):
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['id','email', 'name','username','phone']
+    list_display = ['id','email', 'name','username','phone','room']
 
 class SessionAdmin(admin.ModelAdmin):
     list_display = ['id','student', 'teacher','start_time','end_time','title','message','requested_cost']
@@ -35,3 +35,5 @@ admin.site.register(Gender)
 admin.site.register(Event,eventAdmin)
 admin.site.register(Wallet)
 admin.site.register(SessionRequest,SessionAdmin)
+admin.site.register(NotifyRoom)
+admin.site.register(Notification)

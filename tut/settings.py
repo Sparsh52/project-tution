@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -73,7 +74,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'tut.wsgi.application'
+#WSGI_APPLICATION = 'tut.wsgi.application'
+ASGI_APPLICATION='tut.asgi.application'
 
 
 # Database
@@ -142,3 +144,9 @@ EMAIL_POST = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER ='chawlasparsh294@gmail.com'
 EMAIL_HOST_PASSWORD ='sqnpneihdcikwfuv'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': "channels.layers.InMemoryChannelLayer"
+    }
+}

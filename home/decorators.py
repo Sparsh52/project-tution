@@ -18,13 +18,11 @@ def logindec(view_func):
                 else:
                     return redirect('/teacher-profile-teacher/')
             except Teacher.DoesNotExist:
-                with contextlib.suppress(Student.DoesNotExist):
-                    student = Student.objects.get(user=request.user)
-                    if student and next_page:
-                        print(f"In Student {student}")
-                        return redirect(next_page)
-                    else:
-                        return redirect('/student-profile/')
+                student = Student.objects.get(user=request.user)
+                if next_page is not None and next_page!='http://127.0.0.1:8000/':
+                    return redirect(next_page)
+                else:
+                    return redirect('/student-profile/')
         return view_func(request, *args, **kwargs)
 
     return wrapper
