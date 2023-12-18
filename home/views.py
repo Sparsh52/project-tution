@@ -82,8 +82,9 @@ def registered_students_teacher(request):
 @never_cache
 @login_required(login_url='home')
 def student_profile_teacher(request,student_id):
+   teacher=Teacher.objects.get(user=request.user)
    student=Student.objects.get(id=student_id)
-   return render(request,'student_profile_teacher.html',{'student':student})
+   return render(request,'student_profile_teacher.html',{'student':student,'teacher':teacher})
 
 
 @never_cache
@@ -502,7 +503,7 @@ def available_slots_student(request, teacher_id):
         selected_date = request.POST.get('selectedDate')
         date_filter = Q(start_time__icontains=selected_date)
         teacher_events = teacher_events.filter(date_filter)
-    return render(request, 'available_slots.html', {'teacher_events': teacher_events,'teacher':teacher,'student':student})
+    return render(request, 'available_slots_2.html', {'teacher_events': teacher_events,'teacher':teacher,'student':student})
 
 
 @never_cache

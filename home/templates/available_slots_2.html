@@ -1,0 +1,112 @@
+{% extends "base2.html" %}
+{% load static %}
+{% block content %}
+<!-- Available Slots Section -->
+<section class="colorful jumbotron mb-0" role="banner">
+    <div class="container available-slots-container">
+        <div class="row mt-2 justify-content-between">
+            <div class="col-md-8 text-white align-self-center mb-2 p-4">
+                <h1 style="color:#000000"><b><i>Available Slots</i></b></h1>
+                <p style="color:#000000">
+                    <b>Explore the available slots and book your preferred time for learning.</b>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="slots-container" class="slots-container mb-5 pb-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 shadow-lg rounded">
+                <div class="row mt-3 mb-3">
+                    <form id="availability-form" action="{% url 'available_slots_student' teacher.id %}" method="POST">
+                        {% csrf_token %}
+                        <div class="col-md-12">
+                            <label for="selectedDate">Select Date</label>
+                            <input type="date" name="selectedDate" id="selectedDate" class="form-control">
+                        </div><br>
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-primary btn-block">Check Availability</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-9 px-4 mb-5 ml-5">
+                <!-- Slots will be dynamically added here -->
+            </div>
+
+        </div>
+    </div>
+</section>
+{% with event_room_name=student.user.room.name %}
+{{ event_room_name|json_script:"room-name-event" }}
+{% endwith %}
+{% with teacher_name=teacher.user.name %}
+{{ teacher_name|json_script:"teacher-name" }}
+{% endwith %}
+<script>
+    const eventroomName = JSON.parse(document.getElementById('room-name-event').textContent);
+    const teacherName = JSON.parse(document.getElementById('teacher-name').textContent);
+    const eventSocket = new WebSocket(
+        'ws://' + window.location.host + `/ws/book-slot/${eventroomName}/`
+        );
+    eventSocket.onopen = function () {
+        console.log(' Event Socket successfully connected.');
+        eventSocket.send(JSON.stringify({ action: 'send_event_on_open', eventroomName ,teacherName}));
+    };
+
+    eventSocket.onclose = function (e) {
+        console.log('Socket closed unexpectedly');
+    };
+
+    eventSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        console.log(data);
+        const all_events = data.Events.all_events;
+        console.log(all_events)
+        const count = data.Events.count;
+        console.log(count)
+        updateSlots(all_events);
+    };
+    function updateSlots(updatedSlots) {
+        const slotsContainer = document.querySelector('.col-lg-9');
+        slotsContainer.innerHTML = '';
+        updatedSlots.forEach(slot => {
+            console.log("In LOOP",slot.id)
+            const slotCard = document.createElement('div');
+            slotCard.className = 'card mb-4 shadow-lg';
+            slotCard.style.width = '18rem';
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body';
+            const title = document.createElement('h5');
+            title.className = 'card-title';
+            title.textContent = slot.title;
+            const cardText = document.createElement('p');
+            cardText.className = 'card-text';
+            cardText.innerHTML = `<strong>Date:</strong> ${slot.start_time.split('T')[0]}<br>
+                                 <strong>Time:</strong> ${formatTime(slot.start_time)} to ${formatTime(slot.end_time)}`;
+            const bookButton = document.createElement('a');
+            bookButton.href = `/book-slot/{{teacher.id}}/{{student.id}}/${slot.id}`;
+            bookButton.className = 'btn btn-primary';
+            bookButton.textContent = 'Book Slot';
+            cardBody.appendChild(title);
+            cardBody.appendChild(cardText);
+            cardBody.appendChild(bookButton);
+            slotCard.appendChild(cardBody);
+            slotsContainer.appendChild(slotCard);
+        });
+    }
+
+
+    function formatTime(dateTimeStr) {
+        const dateTime = new Date(dateTimeStr);
+        const hours = dateTime.getHours().toString().padStart(2, '0');
+        const minutes = dateTime.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+    }
+    
+</script>
+
+{% endblock %}
