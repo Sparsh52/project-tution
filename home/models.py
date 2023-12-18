@@ -1,6 +1,7 @@
 from django.db import models
 # from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
+from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.urls import reverse
 from django.http import HttpResponse
@@ -10,6 +11,8 @@ from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser
 )
 from django.conf import settings
+from datetime import datetime
+from pytz import timezone
 import re
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _

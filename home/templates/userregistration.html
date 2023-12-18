@@ -5,6 +5,13 @@
     <div class="container mt-5"></div>
     <form class="col-3 mx-auto card p-3 shadow-lg" action="{% url 'register' %}" method="POST">
         <h1 class="card-title display-6" >Registration-Page</h1>
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-danger" role="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
         {% csrf_token %}
         {{form.as_p}}
         <div class="form-group">

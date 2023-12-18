@@ -167,7 +167,7 @@ def register(request):
       for field, errors in fm.errors.items():
          for error in errors:
             messages.error(request, f"{field}: {error}")
-      return redirect('home')
+      return render(request, 'userregistration.html', {'form': fm})
    return render(request, 'userregistration.html', {'form': fm})
 
 
@@ -481,6 +481,10 @@ def event(request, teacher_id, event_id=None):
         if int(cost)<0:
             messages.error(request,"Event cost cannot be negative")
             return redirect(reverse('event_new', kwargs={'teacher_id': teacher.id}))
+        if Event.objects.filter(start_time__date__gt=start_date_obj,end_time__date__lt=end_date_obj).exists():
+                print("Already an event exist within this timeline")
+                messages.error(request,"Already an event exist within this timeline")
+                return redirect(reverse('event_new', kwargs={'teacher_id': teacher.id}))
         if Event.objects.filter(Q(start_time__date__gte=start_date_obj,end_time__date__lte=end_date_obj) &
                                 (Q(start_time__time__lte=start_time_obj,end_time__time__gte=end_time_obj)|
                                 Q(start_time__time__gte=start_time_obj,end_time__time__lte=end_time_obj))).exists():
@@ -789,12 +793,14 @@ def request_session(request, teacher_id):
             if student.wallet.balance-cost<=0:
                 messages.error(request,"Plz refill your wallet balance")
                 return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
-            # filtered_sessions=SessionRequest.objects.filter(Q(start_time__date__gte=start_time.date(),end_time__date__lte=end_time.date()) &
-            #                     (Q(start_time__time__lte=start_time.time(),end_time__time__gte=end_time.time())|
-            #                     Q(start_time__time__gte=start_time.time(),end_time__time__lte=end_time.time())))
-            # values_list = filtered_sessions.values()
-            # for session_values in values_list:
-            #     print(session_values)
+            print("-----------------------------Filtered Sessions----------------------------------------------")
+            #filtered_sessions = SessionRequest.objects.filter(start_time__date=start_time.date(),end_time__date=end_time.date())
+            #breakpoint()
+            #print(filtered_sessions)
+            if SessionRequest.objects.filter(start_time__date__gt=start_time.date(),end_time__date__lt=end_time.date()).exists():
+                print("Already a slot exist within this timeline")
+                messages.error(request,"Already a session exist within this timeline")
+                return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
             if SessionRequest.objects.filter(Q(start_time__date__gte=start_time.date(),end_time__date__lte=end_time.date()) &
                                 (Q(start_time__time__lte=start_time.time(),end_time__time__gte=end_time.time())|
                                 Q(start_time__time__gte=start_time.time(),end_time__time__lte=end_time.time()))).exists():

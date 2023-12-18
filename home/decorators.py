@@ -24,5 +24,4 @@ def logindec(view_func):
                 else:
                     return redirect('/student-profile/')
         return view_func(request, *args, **kwargs)
-
     return wrapper
