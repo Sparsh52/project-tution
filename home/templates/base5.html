@@ -152,16 +152,22 @@
          console.log('In set message', count);
          const ulElement = document.getElementById('notify');
          console.log(ulElement)
-         ulElement.innerHTML = ''; // Clear existing notifications
+         ulElement.innerHTML = ''; 
          allNotifications.forEach(notification => {
              const newLi = document.createElement('li');
              const newAnchor = document.createElement('a');
              newAnchor.className = 'dropdown-item text-wrap';
              newAnchor.href = `#`;
-             newAnchor.textContent = notification.message; // Adjust the field name as needed
-             newAnchor.setAttribute('data-notification-id', notification.id); // Store the notification ID as a data attribute
+             newAnchor.textContent = notification.message; 
+             newAnchor.setAttribute('data-notification-id', notification.id); 
              newAnchor.addEventListener('click', handleNotificationClick);
              newLi.appendChild(newAnchor);
+             const dividerLine = document.createElement('hr');
+             dividerLine.style.borderColor = 'blue';
+             dividerLine.style.borderWidth = '7px';
+             dividerLine.style.margin = '0'; 
+             dividerLine.style.padding = '0'; 
+             newLi.appendChild(dividerLine);
              ulElement.appendChild(newLi);
          });
          const bellCountElement = document.getElementById('bellCount');

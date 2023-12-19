@@ -5,27 +5,31 @@ from django.contrib.auth.models import User
 from .models import *
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from .tasks import *
+from django.forms.models import model_to_dict
 
 @receiver(post_save, sender=Notification)
 def notification_created(sender, instance, created, **kwargs):
     print("In signal notification created ")
     if created:
-        user = instance.user
-        print(user)
-        room_name = user.room.name
-        print(room_name)
-        channel_layer = get_channel_layer()
-        print(channel_layer)
-        room_group_name = 'notify_%s' % room_name
-        print(room_group_name)
-        data = {'count': Notification.objects.filter(user=user, is_seen=False).count(),'current_notification':instance.message,'user':user}
-        async_to_sync(channel_layer.group_send)(
-            room_group_name, {
-                "type": "send_notification",
-                "Xdata":data,
-                "context":"notification_created"
-            }
-        )
+        broadcast_notification.delay(model_to_dict(instance))
+        # user = instance.user
+        # print(user)
+        # room_name = user.room.name
+        # print(room_name)
+        # channel_layer = get_channel_layer()
+        # print(channel_layer)
+        # room_group_name = 'notify_%s' % room_name
+        # print(room_group_name)
+        # data = {'count': Notification.objects.filter(user=user, is_seen=False).count(),'current_notification':instance.message,'user':user}
+        # async_to_sync(channel_layer.group_send)(
+        #         room_group_name, {
+        #             "type": "send_notification",
+        #             "Xdata":data,
+        #             "context":"notification_created"
+        #     }
+        # )
+
 
 @receiver(post_save, sender=Teacher)
 def teacher_created_or_updated(sender, instance, created, **kwargs):
@@ -44,7 +48,6 @@ def teacher_created_or_updated(sender, instance, created, **kwargs):
             updated_message =updated_message = "🎺 You have successfully updated your profile.🎺 "
         else:
             updated_message = f"Profile updated for {name}."
-
         Notification.objects.create(user=user, is_seen=False, message=updated_message)
 @receiver(post_save, sender=Student)
 def student_created_or_updated(sender, instance, created, **kwargs):
@@ -69,6 +72,7 @@ def event_created_or_booked(sender, instance, created, **kwargs):
     print("In event created or booked_by")
     if created:
         teacher = instance.created_by.user
+        broadcast_event.delay(model_to_dict(instance))
         creator_name = teacher.name
         room_name=teacher.room.name
         print(room_name)
