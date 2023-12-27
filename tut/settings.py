@@ -145,11 +145,11 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER ='chawlasparsh294@gmail.com'
 EMAIL_HOST_PASSWORD ='sqnpneihdcikwfuv'
 
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': "channels.layers.InMemoryChannelLayer"
-    }
-}
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': "channels.layers.InMemoryChannelLayer"
+#     }
+# }
 
 # CELERY related settings
 BROKER_URL = 'redis://127.0.0.1:6379'
@@ -158,3 +158,12 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Kolkata'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}

@@ -1,63 +1,80 @@
 {% extends "base2.html" %}
 
 {% block content %}
-    <div class="container mt-5">
-        <form class="col-6 mx-auto card p-3 shadow-lg" action="{% url 'student_update' student_id=student.id %}" method="POST" enctype="multipart/form-data">
-            <h1 class="card-title display-6" >Student Updation-Page</h1>
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="exampleDataList" class="form-label">Gender</label>
-                <select class="form-control" aid="id_gender_type" name="gender">
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                </select>
-                <label for="exampleDataList" class="form-label">Institution Type</label>
-                <select class="form-control" id="id_institution_type" name="ins_type">
-                    <option value="School">School</option>
-                    <option value="University">University</option>
-                </select>
-                <div class="mb-3">
-                    <label for="exampleInputEmail1" class="form-label">Institution Name</label>
-                    <input type="text" class="form-control" name="institution_name" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off" pattern="[a-zA-Z ]*">
-                </div>
-                <div id="semesterField" style="display: none;">
-                    <label for="exampleDataList" class="form-label">Semester</label>
-                    <input class="form-control" type="number" name="semester" placeholder="Semester" autocomplete="off" min="1">
-                </div>
-                <div id="standardField">
-                    <label for="exampleDataList" class="form-label">Standard</label>
-                    <input class="form-control" type="number" name="standard" placeholder="Standard" autocomplete="off" min="1">
-                </div>
-            </div>
+<div class="container mt-5">
+    <form class="col-6 mx-auto card p-3 shadow-lg" action="{% url 'student_update' student_id=student.id %}" method="POST" enctype="multipart/form-data">
+        <h1 class="card-title display-6">Update-Profile</h1>
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="exampleDataList" class="form-label">Gender</label>
+            <select class="form-control" id="id_gender_type" name="gender">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+
+            <label for="exampleDataList" class="form-label">Institution Type</label>
+            <select class="form-control" id="id_institution_type" name="ins_type">
+                <option value="School">School</option>
+                <option value="University">University</option>
+            </select>
+
             <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Student Image</label>
-                <input type='file' name="student_image" class="form-control" accept="image/*">
+                <label for="exampleInputEmail1" class="form-label">Institution Name</label>
+                <input type="text" class="form-control" name="institution_name" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off" pattern="[a-zA-Z ]*" value="{{ student.institution_name }}">
             </div>
-            <div class="form-group">
-                <input class="btn btn-danger btn-lg btn-block" type="submit" value="Submit">
+
+            <div id="semesterField" style="display: none;">
+                <label for="exampleDataList" class="form-label">Semester</label>
+                <input class="form-control" type="number" name="semester" placeholder="Semester" autocomplete="off" min="1" max="8" onkeypress="return !(event.charCode == 46)"  id="id_semester">
             </div>
-        </form>
-    </div>
+
+            <div id="standardField">
+                <label for="exampleDataList" class="form-label">Standard</label>
+                <input class="form-control" type="number" name="standard" placeholder="Standard" autocomplete="off" min="1" max="12" onkeypress="return !(event.charCode == 46)" id="id_standard">
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Student Image</label>
+            <input type='file' name="student_image" class="form-control" accept="image/*">
+        </div>
+
+        <div class="form-group">
+            <input class="btn btn-danger btn-lg btn-block" type="submit" value="Submit">
+            <a href="/student-profile/" class="btn btn-secondary btn-lg btn-warning float-end">Cancel</a>
+        </div>
+    </form>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    function toggleFields() {
-        var institutionType = document.getElementById("id_institution_type").value;
-        var semesterField = document.getElementById("semesterField");
-        var standardField = document.getElementById("standardField");
+    document.addEventListener("DOMContentLoaded", function () {
+        function toggleFields() {
+            var institutionType = document.getElementById("id_institution_type").value;
+            var semesterField = document.getElementById("semesterField");
+            var standardField = document.getElementById("standardField");
+            var semesterInput = document.querySelector('[name="semester"]');
+            var standardInput = document.querySelector('[name="standard"]');
 
-        if (institutionType === "University") {
-            semesterField.style.display = "block";
-            standardField.style.display = "none";
-        } else {
-            semesterField.style.display = "none";
-            standardField.style.display = "block";
+            if (institutionType === "University") {
+                semesterField.style.display = "block";
+                standardField.style.display = "none";
+                semesterInput.required = true;
+                standardInput.required = false;
+                document.getElementById("id_semester").value = '{{student.standard_or_semester}}'; 
+            } else {
+                semesterField.style.display = "none";
+                standardField.style.display = "block";
+                semesterInput.required = false;
+                standardInput.required = true;
+                document.getElementById("id_standard").value = '{{student.standard_or_semester}}'; 
+            }
         }
-    }
-    toggleFields();
-    document.getElementById("id_institution_type").addEventListener("change", toggleFields);
-});
+
+        document.getElementById("id_institution_type").addEventListener("change", toggleFields);
+        toggleFields();
+        document.getElementById("id_gender_type").value = '{{ student.gender.gender }}';
+        document.getElementById("id_institution_type").value = '{{ student.institution_type }}';
+    });
 </script>
 
 {% endblock %}

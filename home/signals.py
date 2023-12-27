@@ -1,5 +1,5 @@
 # signals.py
-from django.db.models.signals import post_save ,post_delete
+from django.db.models.signals import post_save ,post_delete,pre_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from .models import *
@@ -10,9 +10,32 @@ from django.forms.models import model_to_dict
 
 @receiver(post_save, sender=Notification)
 def notification_created(sender, instance, created, **kwargs):
+    # sourcery skip: avoid-builtin-shadow
     print("In signal notification created ")
+    print(instance.user)
     if created:
-        broadcast_notification.delay(model_to_dict(instance))
+        print(type(instance))
+        x=model_to_dict(instance)
+        id=x['user']
+        print(type(id))
+        user=User.objects.get(id=id)
+        print(user)
+        teacher=None
+        student=None
+        try:
+            student=Student.objects.get(user=instance.user)
+        except Student.DoesNotExist:
+            teacher=Teacher.objects.get(user=instance.user)
+        print(teacher)
+        print(student)
+        room_name = user.room.name
+        print(room_name)
+        count= Notification.objects.filter(user=x['user'], is_seen=False).count()
+        if teacher is not None:
+            broadcast_notification_teacher.delay(x,room_name,count)
+        else:
+            broadcast_notification_student(x,room_name,count)
+        # breakpoint()
         # user = instance.user
         # print(user)
         # room_name = user.room.name
@@ -72,28 +95,7 @@ def event_created_or_booked(sender, instance, created, **kwargs):
     print("In event created or booked_by")
     if created:
         teacher = instance.created_by.user
-        broadcast_event.delay(model_to_dict(instance))
         creator_name = teacher.name
-        room_name=teacher.room.name
-        print(room_name)
-        registered_students=instance.created_by.registered_students.all()
-        rooms=[]
-        for student in registered_students:
-            rooms.append(student.user.room.name)
-        print("Rooms"+str(rooms))
-        channel_layer = get_channel_layer()
-        print("In event created"+str(channel_layer))
-        for room_name in rooms:
-            room_group_name = 'event_%s' % room_name
-            print(room_group_name)
-            data = {'count': Event.objects.filter(created_by__user__name=creator_name, booked_by__isnull=True).count(),'current_event':instance,'context':'event_created_or_booked'}
-            async_to_sync(channel_layer.group_send)(
-            room_group_name, {
-                "type": "send_events",
-                "Xdata":data,
-                "context":"event_created"
-            }
-        )
         Notification.objects.create(
             user=teacher,
             is_seen=False,
@@ -117,34 +119,20 @@ def event_created_or_booked(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=SessionRequest)
 def session_request_created(sender, instance, created, **kwargs):
+    print(f"Session created{instance}")
     if created:
         teacher = instance.teacher.user
         student = instance.student.user
-        Notification.objects.create(
-            user=teacher,
-            is_seen=False,
-            message=f"🎉 New session request from {instance.student.user.name}. 🎉"
-        )
         Notification.objects.create(
             user=student,
             is_seen=False,
             message=f"🎉 Your session request to {instance.teacher.user.name} has been sent. 🎉"
         )
-
-@receiver(post_delete, sender=SessionRequest)
-def session_request_deleted(sender, instance, **kwargs):
-    teacher = instance.teacher
-    student = instance.student
-    Notification.objects.create(
-        user=instance.student.user,
-        is_seen=False,
-        message=f"🚨 Your session request to {instance.teacher.user.name} has been canceled. 🚨"
-    )
-    Notification.objects.create(
-        user=instance.teacher.user,
-        is_seen=False,
-        message=f"🚨 Session request from {instance.student.user.name} has been canceled. 🚨"
-    )
+        Notification.objects.create(
+            user=teacher,
+            is_seen=False,
+            message=f"🎉 New session request from {instance.student.user.name}. 🎉"
+        )
 
 @receiver(post_delete, sender=Event)
 def event_deleted(sender, instance, **kwargs):

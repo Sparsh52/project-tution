@@ -25,6 +25,7 @@ django-timezone-field==6.1.0
 dnspython==2.4.2
 eventlet==0.33.3
 ez-setup==0.9
+Faker==21.0.0
 greenlet==3.0.2
 hiredis==2.3.2
 hyperlink==21.0.0

@@ -24,6 +24,7 @@ from django.core.paginator import Paginator
 import uuid
 from .decorators import *
 from django.template.loader import render_to_string
+from django.forms.models import model_to_dict
 
 @never_cache
 @logindec
@@ -34,12 +35,12 @@ def home(request):
         password = request.POST.get('password')
         print(email,password)
         if not User.objects.filter(email=email).exists():
-            messages.error(request, 'Invalid Username')
-            return redirect("/register/")
+            messages.error(request, 'Invalid Email,Please Register yourself')
+            return  render(request,"login.html")
         user = authenticate(email=email, password=password)
         if user is None:
             messages.error(request, 'Invalid Password')
-            return redirect('home')
+            return render(request,"login.html")
         else:
             print("Before Login")
             print(user)
@@ -101,7 +102,6 @@ def add_feedback(request, teacher_id):
             comment=comment,
             rating=rating
         )
-        messages.success(request, 'Feedback added successfully!')
         return redirect('teacher_profile', teacher_id=teacher_id)
     return render(request, 'add_feedback.html', {'teacher': teacher,'student':student})
 
@@ -164,9 +164,6 @@ def register(request):
             return extracted_from_home(fm, data, request)
          except Exception as e:
             print("Something Wrong happend",e)
-      for field, errors in fm.errors.items():
-         for error in errors:
-            messages.error(request, f"{field}: {error}")
       return render(request, 'userregistration.html', {'form': fm})
    return render(request, 'userregistration.html', {'form': fm})
 
@@ -178,9 +175,6 @@ def register_teacher(request):
     reg_type = request.session.get('reg_type')
     user_id = request.session.get('user_id')
     user = User.objects.get(id=user_id)
-    if Teacher.objects.filter(user=user).exists():
-        messages.error(request, 'You are already registered as a teacher.')
-        return redirect('home')
     if request.method == 'POST':
       try:
          return extracted_from_register_Teacher(request, user)
@@ -194,9 +188,6 @@ def register_student(request):
    reg_type = request.session.get('reg_type')
    user_id = request.session.get('user_id')
    user = User.objects.get(id=user_id)
-   if Student.objects.filter(user=user).exists():
-        messages.error(request, 'You are already registered as a student.')
-        return redirect('home')
    if request.method == 'POST':
       try:
          return extracted_from_register_student(request,user)
@@ -227,7 +218,7 @@ def extracted_from_home(fm, data, request):
     password = fm.cleaned_data['password']
     reg_type = data['reg_type']
     phone=data['phone']
-    room = f"{name}_room_"
+    room = f"{username}_room_"
     notify_room=NotifyRoom.objects.create(name=room)
     user = User.objects.create_user(name=name, username=username,email=email,phone=phone,password=password,room=notify_room)
     request.session['reg_type'] = reg_type
@@ -252,7 +243,6 @@ def extracted_from_register_Teacher(request, user):
     teacher_type = data['teacher_type']
     gender = data['gender']
     img = request.FILES.get('teacher_image')
-    
     print('Min Hourly Rate:', min_hourly_Rate)
     print('Max Hourly Rate:', max_hourly_Rate)
     print('Subject 1:', sub1)
@@ -263,7 +253,9 @@ def extracted_from_register_Teacher(request, user):
     print('Teacher Type:', teacher_type)
     print('Gender:', gender)
     print('Teacher Image:', img)
-
+    if min_hourly_Rate>max_hourly_Rate:
+        messages.error(request,"minimum hourly rate cannot be greater than max hourly rate")
+        return  redirect('/register-teacher/')
     try:
         gender_instance, _ = Gender.objects.get_or_create(gender=gender.title())
         sub_instance_1, _ = Subject.objects.get_or_create(subject=sub1.title())
@@ -440,8 +432,6 @@ def event(request, teacher_id, event_id=None):
         user_type = "teacher"
         if request.user != teacher.user:
             return HttpResponseForbidden("Forbidden access!")
-
-  
     form_params = {
         'request': request,
         'user': request.user,
@@ -452,45 +442,8 @@ def event(request, teacher_id, event_id=None):
         if student is None
         else {'booked_by': student},
     }
-
     form = EventForm(**form_params)
     if request.POST and form.is_valid():
-        data = request.POST
-        start_time=data['start_time']
-        end_time=data['end_time']
-        print(start_time)
-        print(end_time)
-        if len(start_time)==0:
-            messages.error(request,"Start date cannot be empty")
-            return redirect(reverse('event_new', kwargs={'teacher_id': teacher.id}))
-        if len(end_time)==0:
-            messages.error(request,"end date cannot be empty")
-            return redirect(reverse('event_new', kwargs={'teacher_id': teacher.id}))
-        if start_time>end_time:
-            messages.error(request,"Start date cannot be more than end date")
-            return redirect(reverse('event_new', kwargs={'teacher_id': teacher.id}))
-        start_date_str = data['start_time'].split('T')[0]  
-        start_time_str = data['start_time'].split('T')[1]
-        end_date_str = data['end_time'].split('T')[0]  
-        end_time_str = data['end_time'].split('T')[1]    
-        start_date_obj = datetime.strptime(start_date_str, "%Y-%m-%d")
-        start_time_obj = datetime.strptime(start_time_str, "%H:%M")
-        end_date_obj = datetime.strptime(end_date_str, "%Y-%m-%d")
-        end_time_obj = datetime.strptime(end_time_str, "%H:%M")
-        cost=data['event_cost']
-        if int(cost)<0:
-            messages.error(request,"Event cost cannot be negative")
-            return redirect(reverse('event_new', kwargs={'teacher_id': teacher.id}))
-        if Event.objects.filter(start_time__date__gt=start_date_obj,end_time__date__lt=end_date_obj).exists():
-                print("Already an event exist within this timeline")
-                messages.error(request,"Already an event exist within this timeline")
-                return redirect(reverse('event_new', kwargs={'teacher_id': teacher.id}))
-        if Event.objects.filter(Q(start_time__date__gte=start_date_obj,end_time__date__lte=end_date_obj) &
-                                (Q(start_time__time__lte=start_time_obj,end_time__time__gte=end_time_obj)|
-                                Q(start_time__time__gte=start_time_obj,end_time__time__lte=end_time_obj))).exists():
-                print("Not Possible")
-                messages.error(request,"Not Possible")
-                return redirect(reverse('event_new', kwargs={'teacher_id': teacher.id}))
         form.save()
         return redirect(reverse('book_session', kwargs={'teacher_id': teacher.id}))
     if event_id is None:
@@ -507,7 +460,7 @@ def available_slots_student(request, teacher_id):
         selected_date = request.POST.get('selectedDate')
         date_filter = Q(start_time__icontains=selected_date)
         teacher_events = teacher_events.filter(date_filter)
-    return render(request, 'available_slots_2.html', {'teacher_events': teacher_events,'teacher':teacher,'student':student})
+    return render(request, 'available_slots.html', {'teacher_events': teacher_events,'teacher':teacher,'student':student})
 
 
 @never_cache
@@ -587,7 +540,6 @@ def update_student(request, student_id):
         return redirect('/student-profile/')
     return render(request, 'student_update.html', {'student': student})
 
-from django.contrib import messages
 
 @never_cache
 @login_required(login_url='home')
@@ -793,10 +745,6 @@ def request_session(request, teacher_id):
             if student.wallet.balance-cost<=0:
                 messages.error(request,"Plz refill your wallet balance")
                 return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
-            print("-----------------------------Filtered Sessions----------------------------------------------")
-            #filtered_sessions = SessionRequest.objects.filter(start_time__date=start_time.date(),end_time__date=end_time.date())
-            #breakpoint()
-            #print(filtered_sessions)
             if SessionRequest.objects.filter(start_time__date__gt=start_time.date(),end_time__date__lt=end_time.date()).exists():
                 print("Already a slot exist within this timeline")
                 messages.error(request,"Already a session exist within this timeline")
@@ -813,7 +761,6 @@ def request_session(request, teacher_id):
             session_request.save()
             return redirect(reverse('teacher_profile', kwargs={'teacher_id': teacher.id}))
     else:
-        # print(teacher.title_choices)
         initial_data = {
             'instance': teacher,
         }
@@ -832,7 +779,13 @@ def view_session_requests(request):
 @login_required(login_url='home')
 def approve_session_requests(request,session_id):
     session=SessionRequest.objects.get(id=session_id)
-    event=Event.objects.create(created_by=session.teacher,booked_by=session.student,start_time=session.start_time,end_time=session.end_time,description=session.message,title=session.title,event_cost=session.requested_cost)
+    print(session.teacher)
+    print(session.student)
+    print(session.start_time)
+    print(session.end_time)
+    event_id=str(uuid.uuid4())
+    event=Event.objects.create(id=event_id,created_by=session.teacher,booked_by=session.student,start_time=session.start_time,end_time=session.end_time,description=session.message,title=session.title,event_cost=session.requested_cost)
+    print(event)
     teacher=event.created_by
     student=event.booked_by
     event_cost = event.duration * event.event_cost

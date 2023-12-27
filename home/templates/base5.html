@@ -139,6 +139,8 @@
          console.log('Socket closed unexpectedly');
      };
      notifySocket.onmessage = function (e) {
+        //notifySocket.send(JSON.stringify({ action: 'send_notification_on_open',roomName}));
+         console.log(e)
          const data = JSON.parse(e.data);
          console.log(data);
          console.log('Received data:', data.Xdata.count);

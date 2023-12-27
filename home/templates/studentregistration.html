@@ -8,27 +8,27 @@
             {% csrf_token %}
             <div class="form-group">
                 <label for="exampleDataList" class="form-label">Gender</label>
-                <select class="form-control" id="id_gender_type" name="gender" autocomplete="off">
+                <select class="form-control" id="id_gender_type" name="gender" autocomplete="off" required>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
                 </select>
                 <label for="exampleDataList" class="form-label">Institution Type</label>
-                <select class="form-control" id="id_institution_type" name="ins_type" autocomplete="off">
+                <select class="form-control" id="id_institution_type" name="ins_type" autocomplete="off" required>
                     <option value="School">School</option>
                     <option value="University">University</option>
                 </select>
                 <div class="form-group" id="semesterField" style="display: none;">
                     <label for="id_semester">Semester</label>
-                    <input type="number" class="form-control" name="semester" id="id_semester" min="1" max="8" autocomplete="off">
+                    <input type="number" class="form-control" name="semester" id="id_semester" min="1" max="8" autocomplete="off" onkeypress="return !(event.charCode == 46)"  default="1">
                 </div>
 
                 <div class="form-group" id="standardField" style="display: none;">
                     <label for="id_standard">Standard</label>
-                    <input type="number" class="form-control" name="standard" id="id_standard" min="1" max="12" autocomplete="off">
+                    <input type="number" class="form-control" name="standard" id="id_standard" min="1" max="12" autocomplete="off" onkeypress="return !(event.charCode == 46)" default="1">
                 </div>
                 <div class="mb-3">
                     <label for="exampleInputEmail1" class="form-label">Institution Name</label>
-                    <input type="text" class="form-control" name="institution_name" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off" pattern="[a-zA-Z]+">
+                    <input type="text" class="form-control" name="institution_name" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off" pattern="[a-zA-Z\s]+" required>
                 </div>
 
             </div>
@@ -45,25 +45,26 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // Function to show/hide fields based on institution type
     function toggleFields() {
         var institutionType = document.getElementById("id_institution_type").value;
         var semesterField = document.getElementById("semesterField");
         var standardField = document.getElementById("standardField");
-
+        var semesterInput = document.querySelector('[name="semester"]');
+        var standardInput = document.querySelector('[name="standard"]');
+        
         if (institutionType === "University") {
             semesterField.style.display = "block";
             standardField.style.display = "none";
+            semesterInput.required = true;
+            standardInput.required = false;
         } else {
             semesterField.style.display = "none";
             standardField.style.display = "block";
+            semesterInput.required = false;
+            standardInput.required = true;
         }
     }
-
-    // Initial toggle
     toggleFields();
-
-    // Attach an event listener to the select element
     document.getElementById("id_institution_type").addEventListener("change", toggleFields);
 });
 </script>

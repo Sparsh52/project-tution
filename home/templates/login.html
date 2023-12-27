@@ -4,26 +4,39 @@
 <div class="container mt-5">
 <form class="col-6 mx-auto card p-3 shadow-lg" method="post" enctype="multipart/form-data">
     {% csrf_token %}
+    {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-danger message" role="alert"> {{ message }}
+                </div>
+            {% endfor %}
+    {% endif %}
     <h2>Login</h2>
     <hr>
-    {% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-danger" role="alert">
-            {{ message }}
-        </div>
-    {% endfor %}
-    {% endif %}
     <div class="mb-3">
-    <label for="exampleInputEmail1" class="form-label">email</label>
-    <input type="text" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off">
+    <label for="exampleInputEmail1" class="form-label">Email</label>
+    <input type="text" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off" required>
     <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
     </div>
     <div class="mb-3">
     <label for="exampleInputPassword1" class="form-label">Password</label>
-    <input type="password" name="password" class="form-control" id="exampleInputPassword1" autocomplete="off">
+    <input type="password" name="password" class="form-control" id="exampleInputPassword1" autocomplete="off" required>
     </div>
     <p>Don't Have Account<a href="{% url 'register' %}"> Register </a> </p>
     <p>Forgot your password<a href="{% url 'password_reset' %}"> Reset </a> </p>
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Timeout for message disappearance
+        setTimeout(function() {
+            $('.message').fadeOut('slow');
+        }, 2000); // Adjust the time in milliseconds as needed
+
+        // Delete message on click (optional)
+        $('.del-msg').on('click', function() {
+            $(this).parent().hide();
+        });
+    });
+</script>
 {% endblock %}

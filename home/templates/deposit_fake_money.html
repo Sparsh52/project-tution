@@ -1,18 +1,18 @@
 {% extends "base2.html" %}
 {% block content %}
   <div class="container mt-5">
-    {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-danger" role="alert">
-          {{ message }}
-        </div>
-      {% endfor %}
-    {% endif %}
     <div class="card shadow-lg mx-auto" style="max-width: 400px;">
       <div class="card-body text-center">
         <h1 class="card-title display-4">Deposit Money</h1>
         <form method="post" action="{% url 'deposit_money' %}">
           {% csrf_token %}
+          {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-danger" role="alert">
+              {{ message }}
+            </div>
+          {% endfor %}
+          {% endif %}
           <div class="form-group flex-container">
             <div class="flex-item left-hand">
               <label for="credit_card">Credit Card Number:</label>
@@ -49,4 +49,18 @@
       </div>
     </div>
   </div>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script>
+    $(document).ready(function() {
+        // Timeout for message disappearance
+        setTimeout(function() {
+            $('.alert-danger').fadeOut('slow');
+        }, 2000); // Adjust the time in milliseconds as needed
+
+        // Delete message on click (optional)
+        $('.del-msg').on('click', function() {
+            $(this).parent().hide();
+        });
+    });
+  </script>
 {% endblock %}

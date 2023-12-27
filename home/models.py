@@ -217,11 +217,11 @@ class Event(models.Model):
     id=models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False) 
     created_by=models.ForeignKey(Teacher,on_delete=models.CASCADE)
     booked_by=models.ForeignKey(Student,on_delete=models.CASCADE,blank=True,null=True)
-    title = models.CharField(max_length=200)
-    description = models.TextField()
-    start_time = models.DateTimeField(blank=True, null=True)
-    end_time = models.DateTimeField(blank=True, null=True)
-    event_cost=models.IntegerField(default=0)
+    title = models.CharField(max_length=200,blank=False)
+    description = models.TextField(blank=False)
+    start_time = models.DateTimeField(blank=False, null=True)
+    end_time = models.DateTimeField(blank=False, null=True)
+    event_cost=models.IntegerField(default=0,blank=False)
     
     def get_available_url(self, user_type):
         if user_type != 'student':
@@ -243,14 +243,11 @@ class SessionRequest(models.Model):
     id=models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False) 
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='session_requests')
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='received_requests')
-    start_time = models.DateTimeField(blank=True, null=True)
-    end_time = models.DateTimeField(blank=True, null=True)
-    title=models.CharField(max_length=200,blank=True)
-    message = models.TextField()
-    requested_cost=models.IntegerField(default=0)
-
-    def __str__(self):
-        return f"{self.student.user.username} requested a session with {self.teacher.user.username} on {self.start_time} to {self.end_time}"
+    start_time = models.DateTimeField(blank=False,null=True)
+    end_time = models.DateTimeField(blank=False,null=True)
+    title=models.CharField(max_length=100,blank=False)
+    message = models.TextField(blank=False)
+    requested_cost=models.IntegerField(default=0,blank=False)
     
 class Notification(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE,blank=True,null=True)

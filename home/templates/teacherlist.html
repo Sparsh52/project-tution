@@ -24,30 +24,31 @@
                         {% csrf_token %}
                         <div class="col-md-12">
                             <label for="hourlyPrice"> Maximum Hourly Price</label>
-                            <input type="number" name="hourlyPrice" id="hourlyPrice" class="form-control" min="0">
+                            <input type="number" name="hourlyPrice" id="hourlyPrice" class="form-control" min="0" onkeypress="return !(event.charCode == 46)" value="{{ request.GET.hourlyPrice }}">
                         </div><br>
                         <div class="col-md-12">
                             <label for="experience">Minimum Experience</label><br>
-                            <input type="number" name="experience" id="experience" class="form-control" min="0">
+                            <input type="number" name="experience" id="experience" class="form-control" min="0" onkeypress="return !(event.charCode == 46)" value="{{ request.GET.experience }}">
                         </div><br>
                         <div class="col-md-12">
                             <label for="subject">Subject</label>
-                            <input type="text" name="subject" id="subject" class="form-control" pattern="[a-zA-Z ]*" autocomplete="off">
+                            <input type="text" name="subject" id="subject" class="form-control" pattern="[a-zA-Z]+" autocomplete="off" value="{{ request.GET.subject }}">
                         </div><br>
                         <div class="col-md-12">
                             <label for="teacherType">Teacher Type</label>
                             <select name="teacherType" id="teacherType" class="form-control">
-                                <option value="">Select</option>
-                                <option value="College">College</option>
-                                <option value="School">School</option>
+                                <option value="" {% if not request.GET.teacherType %}selected{% endif %}>Select</option>
+                                <option value="College" {% if request.GET.teacherType == 'College' %}selected{% endif %}>College</option>
+                                <option value="School" {% if request.GET.teacherType == 'School' %}selected{% endif %}>School</option>
                             </select>
-                        </div><br>
+                        </div><br>                        
                         <div class="col-md-12">
                             <label for="standard">Standard or Semester</label>
-                            <input type="number" name="standard_or_semester" id="standard" class="form-control" autocomplete="off" min="1">
+                            <input type="number" name="standard_or_semester" id="standard" class="form-control" autocomplete="off" min="1" onkeypress="return !(event.charCode == 46)" value="{{ request.GET.standard_or_semester }}">
                         </div><br>
                         <div class="col-md-12">
                             <input type="submit" class="btn btn-primary btn-block" value="Apply Filters">
+                            <button type="button" class="btn btn-secondary btn-success float-end" onclick="clearForm()">Clear Filters</button>
                         </div>
                     </form>
                 </div>
@@ -103,4 +104,14 @@
         </div>
     </div>
 </section>
+<script>
+    function clearForm() {
+        document.getElementById("hourlyPrice").value = "";
+        document.getElementById("experience").value = "";
+        document.getElementById("subject").value = "";
+        document.getElementById("teacherType").value = "";
+        document.getElementById("standard").value = "";
+        window.location.href = "/teachers-list/";
+    }
+</script>
 {% endblock %}

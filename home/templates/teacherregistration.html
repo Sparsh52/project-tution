@@ -6,47 +6,54 @@
         <form class="col-6 mx-auto card p-3 shadow-lg" action="{% url 'register_teacher' %}" method="POST" enctype="multipart/form-data">
             <h1 class="card-title display-6" >Teacher Registration-Page</h1>
             {% csrf_token %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-danger" role="alert">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
             <div class="form-group">
                 <div class="mb-3">
                     <label for="exampleInputPassword1" class="form-label">Subject-1</label>
-                    <input type="text" class="form-control" name="sub1" id="exampleInputPassword1" autocomplete="off" pattern="[a-zA-Z]+">
+                    <input type="text" class="form-control" name="sub1" id="exampleInputPassword1" autocomplete="off" pattern="[a-zA-Z]+" required>
                 </div>
                 <div class="mb-3">
                     <label for="exampleInputPassword1" class="form-label">Subject-2</label>
-                    <input type="text" class="form-control" name="sub2" id="exampleInputPassword1" autocomplete="off" pattern="[a-zA-Z]+">
+                    <input type="text" class="form-control" name="sub2" id="exampleInputPassword1" autocomplete="off" pattern="[a-zA-Z]+" required>
                 </div>
                 <div class="mb-3">
                     <label for="exampleInputPassword1" class="form-label">Subject-3</label>
-                    <input type="text" class="form-control" name="sub3" id="exampleInputPassword1" autocomplete="off" pattern="[a-zA-Z]+">
+                    <input type="text" class="form-control" name="sub3" id="exampleInputPassword1" autocomplete="off" pattern="[a-zA-Z]+" required>
                 </div>
                 <div class="mb-3">
                     <label for="exampleInputPassword1" class="form-label">Experience</label>
-                    <input type="number" class="form-control" name="exp" id="exampleInputPassword1" autocomplete="off" pattern="[0-9]" min="0">
+                    <input type="number" class="form-control" name="exp" id="exampleInputPassword1" autocomplete="off" pattern="[0-9]" min="0" onkeypress="return !(event.charCode == 46)" required>
                 </div>
                 <div class="mb-3">
                     <label for="exampleInputPassword1" class="form-label">Min Hourly Rate</label>
-                    <input type="number" class="form-control" name="min_hourly_rate" id="exampleInputPassword1" autocomplete="off" pattern="[0-9]" min="0">
+                    <input type="number" class="form-control" name="min_hourly_rate" id="exampleInputPassword1" autocomplete="off" pattern="[0-9]*" min="0" onkeypress="return !(event.charCode == 46)" required>
                 </div>
                 <div class="mb-3">
                     <label for="exampleInputPassword1" class="form-label">Max Hourly Rate</label>
-                    <input type="number" class="form-control" name="max_hourly_rate" id="exampleInputPassword1" autocomplete="off" pattern="[0-9]" min="0">
+                    <input type="number" class="form-control" name="max_hourly_rate" id="exampleInputPassword1" autocomplete="off" pattern="[0-9]" min="0" onkeypress="return !(event.charCode == 46)" required>
                 </div>
                 <div class="form-group">
                     <label for="id_teacher_type">Teacher Type</label>
-                    <select class="form-control" id="id_teacher_type" name="teacher_type" autocomplete="off" onchange="toggleFields()">
-                        <option value="College">College</option>
+                    <select class="form-control" id="id_teacher_type" name="teacher_type" autocomplete="off" onchange="toggleFields()" required>
+                        <option value="University">University</option>
                         <option value="School">School</option>
                     </select>
                 </div>
 
                 <div class="form-group" id="semesterField" style="display: none;">
                     <label for="id_semester">Semester</label>
-                    <input type="number" class="form-control" name="semester" id="id_semester" min="1" max="8" autocomplete="off" pattern="[0-9]">
+                    <input type="number" class="form-control" name="semester" id="id_semester" min="1" max="8" autocomplete="off" pattern="[0-9]" onkeypress="return !(event.charCode == 46)">
                 </div>
 
                 <div class="form-group" id="standardField" style="display: none;">
                     <label for="id_standard">Standard</label>
-                    <input type="number" class="form-control" name="standard" id="id_standard" min="1" max="12" autocomplete="off">
+                    <input type="number" class="form-control" name="standard" id="id_standard" min="1" max="12" autocomplete="off" pattern="[0-9]" onkeypress="return !(event.charCode == 46)">
                 </div>
             <label for="exampleDataList" class="form-label">Gender</label>
             <select class="form-control" id="id_gender_type" name="gender" autocomplete="off" >
@@ -68,15 +75,31 @@
         var teacherType = document.getElementById("id_teacher_type").value;
         var semesterField = document.getElementById("semesterField");
         var standardField = document.getElementById("standardField");
-
-        if (teacherType === 'College') {
+        var semesterInput = document.querySelector('[name="semester"]');
+        var standardInput = document.querySelector('[name="standard"]');
+        if (teacherType === 'University') {
             semesterField.style.display = 'block';
             standardField.style.display = 'none';
+            semesterInput.required = true;
+            standardInput.required = false;
         } else if (teacherType === 'School') {
             semesterField.style.display = 'none';
             standardField.style.display = 'block';
+            semesterInput.required = false;
+            standardInput.required = true;
         }
     }
     toggleFields();
+</script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+    $(document).ready(function() {
+        setTimeout(function() {
+            $('.alert-danger').fadeOut('slow');
+        }, 2000); 
+        $('.del-msg').on('click', function() {
+            $(this).parent().hide();
+        });
+    });
 </script>
 {% endblock %}

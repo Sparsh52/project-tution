@@ -4,16 +4,17 @@
 <div style="background-image: url('https://images.theconversation.com/files/268439/original/file-20190409-2921-1a4uike.jpg?ixlib=rb-1.1.0&q=45&auto=format&w=1000&fit=clip'); background-repeat: no-repeat; background-position: center; background-size: cover; height: 100vh; width: 100vw; position: absolute">
     <div class="container mt-5"></div>
     <form class="col-3 mx-auto card p-3 shadow-lg" action="{% url 'register' %}" method="POST">
-        <h1 class="card-title display-6" >Registration-Page</h1>
-        {% if messages %}
-        {% for message in messages %}
-        <div class="alert alert-danger" role="alert">
-            {{ message }}
-        </div>
-        {% endfor %}
-        {% endif %}
+        <h1 class="card-title display-6">Registration-Page</h1>
         {% csrf_token %}
-        {{form.as_p}}
+        
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {{ field }}
+                <span style="color: red;">{{ field.errors }}</span>
+            </div>
+        {% endfor %}
+
         <div class="form-group">
             <label for="exampleDataList" class="form-label">What do you want to register as?</label>
             <input class="form-control" list="datalistOptions" id="exampleDataList" name="reg_type" placeholder="Type to search..." onchange="updateHiddenField()" autocomplete="off" required>
@@ -22,6 +23,7 @@
                 <option value="Student">Student</option>
             </datalist>
         </div>
+        
         <div class="form-group">
             <input class="btn btn-warning btn-lg btn-block" type="submit" value="Submit">
         </div>
