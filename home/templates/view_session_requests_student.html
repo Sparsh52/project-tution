@@ -4,6 +4,7 @@
     {% if session_requests %}
         <div class="card-deck">
             {% for request in session_requests %}
+                {% if not request.is_approved %}
                     <div class="card mb-4">
                         <div class="card-body d-flex align-items-center">
                             <div class="col-md-2">
@@ -15,9 +16,11 @@
                                 <p class="card-text">{{ request.title }}</p>
                                 <p class="card-text">{{ request.message }}</p>
                                 <p class="card-text">&#8377;{{ request.requested_cost }}</p>
+                                <a href="/reset-session/{{ request.id }}" class="btn btn-danger">Reset Slot</a>
                             </div>
                         </div>
                     </div>
+                {% endif %}
             {% endfor %}
         </div>
     {% else %}

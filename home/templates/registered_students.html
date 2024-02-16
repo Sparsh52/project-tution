@@ -35,6 +35,8 @@
 </style>
 
 <div class="col-lg-9 px-4 mb-5 ml-5 mt-3" margin="auto">
+    <h2>Registered Students</h2>
+    {% if students %}
     {% for student in students %}
         <div class="row search-card-result rounded shadow-lg mb-1 d-flex justify-content-center align-items-center mx-auto" style="width: 55vw;">
             <div class="col-md-3">
@@ -61,6 +63,11 @@
         </div>
         <br>
     {% endfor %}
+    {% else  %}
+    <div class="alert alert-danger" role="alert">
+        <strong>No Students available here</strong>
+    </div>
+    {% endif %}
 </div>
 
 </div>

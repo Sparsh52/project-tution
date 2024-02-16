@@ -9,32 +9,47 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        .navbar-brand {
-            font-size: 8px; 
+        .navbar-brand-heading {
+            font-size: 25px; 
             font-family: 'sans-serif';
+            text-decoration: none;
+            text-transform: none;
         }
-        .navbar {
-            padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
+        .navbar-brand {
+            font-size: 15px; 
+            font-family:Helvetica, sans-serif;
+            margin-left:5px;
+            a{
+                text-decoration: none;
+                list-style-type: none;
+                text-transform: uppercase;
+                background-color: #2C2F33;
+                position: relative;
+            }
         }
-        .navbar,li,
-        a {
-  text-decoration: none;
-  list-style-type: none;
-  text-transform: uppercase;
-  position: relative;
-}
-    ul li { 
-         /* padding: 9px 22.5px 11px 22.5px; */
-         display: inline-block; 
-         /* float:right;  */
-         border: 3px solid transparent 
-    }
-     ul li:hover {  
-         border: 3px red solid;
-       
-    }
-    .navbar img {
+
+        .navbar,
+        li
+         {
+            text-decoration: none;
+            list-style-type: none;
+            text-transform: uppercase;
+            background-color: #3a7dd3;
+            position: relative;
+        }
+
+        ul.first-items li {
+            display: inline-block;
+            border: 3px solid transparent;
+            margin-right: 15px;
+            text-align: center;
+            margin-left: 15px;
+        }
+
+        ul.first-items li:hover {
+            border: 3px #f32121 solid;
+        }
+        .navbar img {
             width: 30px;
             height: 30px;
             border-radius: 50%;
@@ -61,7 +76,9 @@
             min-width: 2em;
             font-weight: bold;
         }
-        
+        .collapse.navbar-collapse{
+            justify-content: space-evenly;
+        }
 
        
     </style>
@@ -72,11 +89,8 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-            <div class="d-flex align-items-center">
-                <a class="navbar-brand" style="color: red; font-family: 'Helvetica', sans-serif; padding-left:10px;" ><b>EduMentor</b></a>
-            </div>
-            <div class="navbar">
-                <ul>
+                <a class="navbar-brand-heading" style="color: red; font-family: 'Helvetica', sans-serif; padding-left: 10px;" ><b>EduMentor</b></a>
+                <ul class="first-items" style="margin-top: 12px;">
                     <li><a class="navbar-brand" href="/teacher-profile-teacher/" style="color: white;"><b>Teacher Profile</b></a></li>
                     <li><a class="navbar-brand" href="/registered-students/" style="color: white;"><b>Student List</b></a></li>
                     <li><a class="navbar-brand" href="/event/new/{{ teacher.id }}" style="color: white;"><b>New Event</b></a></li>
@@ -86,20 +100,8 @@
                     <li><a class="navbar-brand" href="/view-wallet/" style="color: white;"><b>Wallet</b></a></li> 
                     <li><a class="navbar-brand" href="{% url 'view_session_requests' %}" style="color: white;"><b>View Session Requests</b></a></li>                      
                 </ul>
-            </div>                         
-            <li class="nav-item" style="margin-right: 20px;">
-                <a class="nav-link dropdown-toggle" href="/teacher-profile-teacher/" data-bs-toggle="dropdown" style="color: white; padding-left: 100px;">
-                    <img src="{{ teacher.teacher_image_url }}" alt="User Image">
-                    <b>{{ teacher.user.username|title }}</b>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="/teacher-profile-teacher/" style="background-color: white;">Teacher-Profile</a></li>
-                    {% if request.user.is_authenticated  %}
-                    <li><a class="dropdown-item" href="{% url 'logout' %}" style="background-color: red; color: white;">Logout</a></li>
-                    {% endif %}
-                </ul>
-            </li>
-            <div class="d-flex dropstart">
+            </div>
+            <div class="d-flex dropstart" style="margin-right: 8px;">
                 <div class="collapse navbar-collapse dropstart" id="navbarNavDarkDropdown">
                   <ul class="navbar-nav">
                     <li class="nav-item dropdown dropdown-menu-start">
@@ -110,7 +112,19 @@
                     </li>
                   </ul>
                 </div>
-            </div>  
+            </div>                          
+            <li class="nav-item" style="margin-right: 20px;">
+                <a class="nav-link dropdown-toggle" href="/teacher-profile-teacher/" data-bs-toggle="dropdown" style="color: white;">
+                    <img src="{{ teacher.teacher_image_url }}" alt="User Image">
+                    <b>{{ teacher.user.username|title }}</b>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/teacher-profile-teacher/" style="background-color: white; font-size: 10px;">Teacher-Profile</a></li>
+                    {% if request.user.is_authenticated  %}
+                    <li><a class="dropdown-item" href="{% url 'logout' %}" style="background-color: red; color: white; font-size: 10px;">Logout</a></li>
+                    {% endif %}
+                </ul>
+            </li> 
         </div>
     </nav>
 
@@ -165,7 +179,7 @@
              newAnchor.addEventListener('click', handleNotificationClick);
              newLi.appendChild(newAnchor);
              const dividerLine = document.createElement('hr');
-             dividerLine.style.borderColor = 'blue';
+             dividerLine.style.borderColor = 'red';
              dividerLine.style.borderWidth = '7px';
              dividerLine.style.margin = '0'; 
              dividerLine.style.padding = '0'; 

@@ -53,40 +53,56 @@ def notification_created(sender, instance, created, **kwargs):
         #     }
         # )
 
-
+@receiver(pre_save, sender=Teacher)
+def teacher_pre_save(sender, instance, **kwargs):
+    try:
+        instance._pre_save_instance = Teacher.objects.get(pk=instance.pk)
+    except Teacher.DoesNotExist:
+        instance._pre_save_instance = instance
 @receiver(post_save, sender=Teacher)
 def teacher_created_or_updated(sender, instance, created, **kwargs):
+    #previous instance
+    pre_save_instance = instance._pre_save_instance
+    print("In teacher previous"+str(pre_save_instance))
+    #current instance
+    print(instance)
     user = instance.user
     name = user.name
     if created:
         Notification.objects.create(user=user, is_seen=False, message=f"🎉 Welcome, {name}! 🎉")
     else:
-        original_values = instance.__class__.objects.filter(pk=instance.pk).values().first()
-
-        if updated_fields := [
-            field
-            for field in instance.__dict__
-            if original_values.get(field) != getattr(instance, field)
-        ]:
-            updated_message =updated_message = "🎺 You have successfully updated your profile.🎺 "
+        # original_values = instance.__class__.objects.filter(pk=instance.pk).values().first()
+        if (pre_save_instance.teacher_type==instance.teacher_type and pre_save_instance.standard_or_semester==int(instance.standard_or_semester)) and pre_save_instance.min_hourly_rate==instance.min_hourly_rate and pre_save_instance.max_hourly_rate==instance.max_hourly_rate and pre_save_instance.subject1.subject==instance.subject1.subject and pre_save_instance.subject2.subject==instance.subject2.subject and pre_save_instance.subject3.subject==instance.subject3.subject and pre_save_instance.gender.gender==instance.gender.gender:
+            # print(pre_save_instance.standard_or_semester,instance.standard_or_semester)
+            # print(type(pre_save_instance.standard_or_semester),type(instance.standard_or_semester))
+            # print(pre_save_instance.standard_or_semester==instance.standard_or_semester)
+            print("No update")
         else:
-            updated_message = f"Profile updated for {name}."
-        Notification.objects.create(user=user, is_seen=False, message=updated_message)
+            updated_message="🎺 You have successfully updated your profile.🎺 "
+            Notification.objects.create(user=user, is_seen=False, message=updated_message)
+
+@receiver(pre_save, sender=Student)
+def student_pre_save(sender, instance, **kwargs):
+    try:
+        instance._pre_save_instance = Student.objects.get(pk=instance.pk)
+    except Student.DoesNotExist:
+        instance._pre_save_instance = instance
+
 @receiver(post_save, sender=Student)
 def student_created_or_updated(sender, instance, created, **kwargs):
+    pre_save_instance = instance._pre_save_instance
+    print(f"In student created{str(pre_save_instance.__dict__)}")
     user = instance.user
-    name = user.name
     if created:
+        name = user.name
         Notification.objects.create(user=user, is_seen=False, message=f"🎉 Welcome, {name}! 🎉")
+    elif (pre_save_instance.institution_type==instance.institution_type and pre_save_instance.standard_or_semester==int(instance.standard_or_semester)) and pre_save_instance.institution_name==instance.institution_name and pre_save_instance.gender.gender==instance.gender.gender:
+        # print(pre_save_instance.standard_or_semester,instance.standard_or_semester)
+        # print(type(pre_save_instance.standard_or_semester),type(instance.standard_or_semester))
+        # print(pre_save_instance.standard_or_semester==instance.standard_or_semester)
+        print("No update")
     else:
-        original_values = instance.__class__.objects.filter(pk=instance.pk).values().first()
-        if original_values and any(
-            original_values.get(field) != getattr(instance, field)
-            for field in instance.__dict__
-        ):
-            updated_message = "🎺 You have successfully updated your profile.🎺 "
-        else:
-            updated_message = f"Profile updated for {name}."
+        updated_message="🎺 You have successfully updated your profile.🎺 "
         Notification.objects.create(user=user, is_seen=False, message=updated_message)
 
 @receiver(post_save, sender=Event)
@@ -99,7 +115,7 @@ def event_created_or_booked(sender, instance, created, **kwargs):
         Notification.objects.create(
             user=teacher,
             is_seen=False,
-            message=f"🎉 Event created by {creator_name}: {instance.title}. Start Time: {instance.start_time}, End Time: {instance.end_time}. 🎉"
+            message=f"🎉 Event created by {creator_name}: {instance.title}. Start Time: {instance.start_time.time().strftime('%H:%M')}, End Time: {instance.end_time.time().strftime('%H:%M')}. 🎉"
         )
     elif instance.booked_by:
         student = instance.booked_by.user
@@ -107,7 +123,7 @@ def event_created_or_booked(sender, instance, created, **kwargs):
         Notification.objects.create(
             user=student,
             is_seen=False,
-            message=f"🎉 Event booked by {booker_name}: {instance.title}. Start Time: {instance.start_time}, End Time: {instance.end_time}, Cost: {instance.event_cost}. 🎉"
+            message=f"🎉 Event booked by {booker_name}: {instance.title}. Start Time: {instance.start_time.time().strftime('%H:%M')}, End Time: {instance.end_time.time().strftime('%H:%M')}, Cost: {instance.event_cost}. 🎉"
         )
         teacher = instance.created_by.user
         creator_name = teacher.name
@@ -133,19 +149,26 @@ def session_request_created(sender, instance, created, **kwargs):
             is_seen=False,
             message=f"🎉 New session request from {instance.student.user.name}. 🎉"
         )
-
-@receiver(post_delete, sender=Event)
-def event_deleted(sender, instance, **kwargs):
-    teacher = instance.created_by.user
-    student = instance.booked_by.user if instance.booked_by else None
-    Notification.objects.create(
-        user=teacher,
-        is_seen=False,
-        message=f"🚨 Event {instance.title} has been canceled. 🚨"
-    )
-    if student:
+    print(instance)
+    if instance.is_approved:
+        student = instance.student.user
         Notification.objects.create(
             user=student,
             is_seen=False,
-            message=f"🚨 Event {instance.title} has been canceled. 🚨"
+            message=f"👍 Your session request to {instance.teacher.user.name} has been approved. 👍"
         )
+
+@receiver(post_delete, sender=SessionRequest)
+def session_request_deleted(sender, instance, **kwargs):
+    student = instance.student.user
+    teacher = instance.teacher.user
+    Notification.objects.create(
+            user=teacher,
+            is_seen=False,
+            message=f"❌ Session request from {student.name} has been rejected. ❌"
+    )
+    Notification.objects.create(
+            user=student,
+            is_seen=False,
+            message=f"❌ Your session request  has been rejected by {teacher.name}.❌"
+    )

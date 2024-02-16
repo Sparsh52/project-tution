@@ -40,7 +40,7 @@
               <div class="input-group-prepend">
                 <span class="input-group-text">&#8377;</span>
               </div>
-              <input type="number" class="form-control" name="amount"  min="1" autocomplete="off" title="Enter an amount greater than or equal to 0" pattern="[0-9]" required>
+              <input type="number" class="form-control" name="amount"  min="1" autocomplete="off" title="Enter an amount greater than or equal to 0" pattern="[0-9]" required  onkeypress="return !(event.charCode == 46)">
             </div>
           </div>
           <button type="submit" class="btn btn-success btn-lg btn-block mt-3">Deposit</button>

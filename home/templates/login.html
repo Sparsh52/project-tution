@@ -2,32 +2,56 @@
 {% block start %}
 <div style="background-image: url('https://www.daysoftheyear.com/cdn-cgi/image/dpr=1%2Cf=auto%2Cfit=cover%2Cheight=651%2Cq=70%2Csharpen=1%2Cwidth=1400/wp-content/uploads/world-student-day1.jpg'); background-repeat: no-repeat; background-position: center; background-size: cover; height: 100vh; width: 100vw; position: absolute"></div>
 <div class="container mt-5">
-<form class="col-6 mx-auto card p-3 shadow-lg" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {% if messages %}
+    <form class="col-6 mx-auto card p-3 shadow-lg" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-danger message" role="alert"> {{ message }}
+                <div class="alert alert-danger message" role="alert">
+                    {{ message }}
+                    <button type="button" class="close del-msg" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
             {% endfor %}
-    {% endif %}
-    <h2>Login</h2>
-    <hr>
-    <div class="mb-3">
-    <label for="exampleInputEmail1" class="form-label">Email</label>
-    <input type="text" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off" required>
-    <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
-    </div>
-    <div class="mb-3">
-    <label for="exampleInputPassword1" class="form-label">Password</label>
-    <input type="password" name="password" class="form-control" id="exampleInputPassword1" autocomplete="off" required>
-    </div>
-    <p>Don't Have Account<a href="{% url 'register' %}"> Register </a> </p>
-    <p>Forgot your password<a href="{% url 'password_reset' %}"> Reset </a> </p>
-    <button type="submit" class="btn btn-primary">Submit</button>
-</form>
+        {% endif %}
+        <h2>Login</h2>
+        <hr>
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Email</label>
+            <input type="text" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off" required value="{{ email|default:'' }}">
+            <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+        </div>
+        <div class="mb-3">
+            <label for="exampleInputPassword1" class="form-label">Password</label>
+            <div class="input-group">
+                <input type="password" name="password" class="form-control" id="exampleInputPassword1" autocomplete="off" required>
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                        <i class="fas fa-eye" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <p>Don't Have Account<a href="{% url 'register' %}"> Register </a></p>
+        <p>Forgot your password<a href="{% url 'password_reset' %}"> Reset </a></p>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 <script>
     $(document).ready(function() {
+        // Toggle password visibility
+        $("#togglePassword").click(function() {
+            var passwordField = $("#exampleInputPassword1");
+            var passwordFieldType = passwordField.attr('type');
+            if (passwordFieldType === 'password') {
+                passwordField.attr('type', 'text');
+            } else {
+                passwordField.attr('type', 'password');
+            }
+        });
+
         // Timeout for message disappearance
         setTimeout(function() {
             $('.message').fadeOut('slow');

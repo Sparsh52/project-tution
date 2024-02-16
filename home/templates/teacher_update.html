@@ -5,34 +5,41 @@
     <form class="col-6 mx-auto card p-3 shadow-lg" action="{% url 'teacher_update' teacher_id=teacher.id %}" method="POST" enctype="multipart/form-data">
         <h1 class="card-title display-6" >Update-Profile</h1>
         {% csrf_token %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-danger" role="alert">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
         <div class="form-group">
             <div class="mb-3">
                 <label for="exampleInputPassword1" class="form-label">Subject-1</label>
-                <input type="text" class="form-control" name="sub1" id="exampleInputPassword1" autocomplete="off" pattern="[a-zA-Z]+" value="{{teacher.subject1.subject}}">
+                <input type="text" class="form-control" name="sub1" id="exampleInputPassword1" autocomplete="off" pattern="[a-zA-Z]+" value="{{teacher.subject1.subject}}" required>
             </div>
             <div class="mb-3">
                 <label for="exampleInputPassword1" class="form-label">Subject-2</label>
-                <input type="text" class="form-control" name="sub2" id="exampleInputPassword1" autocomplete="off" pattern="[a-zA-Z]+" value="{{teacher.subject2.subject}}">
+                <input type="text" class="form-control" name="sub2" id="exampleInputPassword1" autocomplete="off" pattern="[a-zA-Z]+" value="{{teacher.subject2.subject}}" required>
             </div>
             <div class="mb-3">
                 <label for="exampleInputPassword1" class="form-label">Subject-3</label>
-                <input type="text" class="form-control" name="sub3" id="exampleInputPassword1" autocomplete="off" pattern="[a-zA-Z]+" value="{{teacher.subject3.subject}}">
+                <input type="text" class="form-control" name="sub3" id="exampleInputPassword1" autocomplete="off" pattern="[a-zA-Z]+" value="{{teacher.subject3.subject}}" required>
             </div>
             <div class="mb-3">
                 <label for="exampleInputPassword1" class="form-label">Experience</label>
-                <input type="number" class="form-control" name="exp" id="exampleInputPassword1" autocomplete="off" min="0" value="{{teacher.experience}}">
+                <input type="number" class="form-control" name="exp" id="exampleInputPassword1" autocomplete="off" min="0" value="{{teacher.experience}}" required>
             </div>
             <div class="mb-3">
                 <label for="exampleInputPassword1" class="form-label">Min Hourly Rate</label>
-                <input type="number" class="form-control" name="min_hourly_rate" id="exampleInputPassword1" autocomplete="off" min="0" value="{{teacher.min_hourly_rate}}">
+                <input type="number" class="form-control" name="min_hourly_rate" id="exampleInputPassword1" autocomplete="off" min="0" value="{{teacher.min_hourly_rate}}" required>
             </div>
             <div class="mb-3">
                 <label for="exampleInputPassword1" class="form-label">Max Hourly Rate</label>
-                <input type="number" class="form-control" name="max_hourly_rate" id="exampleInputPassword1" autocomplete="off" min="0" value="{{teacher.max_hourly_rate}}">
+                <input type="number" class="form-control" name="max_hourly_rate" id="exampleInputPassword1" autocomplete="off" min="0" value="{{teacher.max_hourly_rate}}" required>
             </div>
             <div class="form-group">
                 <label for="id_teacher_type">Teacher Type</label>
-                <select class="form-control" id="id_teacher_type" name="teacher_type" autocomplete="off" onchange="toggleFields()">
+                <select class="form-control" id="id_teacher_type" name="teacher_type" autocomplete="off" onchange="toggleFields()" required>
                     <option value="University">University</option>
                     <option value="School">School</option>
                 </select>
@@ -87,6 +94,17 @@
         toggleFields();
         document.getElementById("id_gender_type").value = '{{teacher.gender.gender}}';
         document.getElementById("id_teacher_type").value = '{{teacher.teacher_type}}';
+    });
+</script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+    $(document).ready(function() {
+        setTimeout(function() {
+            $('.alert-danger').fadeOut('slow');
+        }, 2000); 
+        $('.del-msg').on('click', function() {
+            $(this).parent().hide();
+        });
     });
 </script>
 

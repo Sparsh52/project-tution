@@ -7,20 +7,20 @@
         {% csrf_token %}
         <div class="form-group">
             <label for="exampleDataList" class="form-label">Gender</label>
-            <select class="form-control" id="id_gender_type" name="gender">
+            <select class="form-control" id="id_gender_type" name="gender" required>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
             </select>
 
             <label for="exampleDataList" class="form-label">Institution Type</label>
-            <select class="form-control" id="id_institution_type" name="ins_type">
+            <select class="form-control" id="id_institution_type" name="ins_type" required>
                 <option value="School">School</option>
                 <option value="University">University</option>
             </select>
 
             <div class="mb-3">
                 <label for="exampleInputEmail1" class="form-label">Institution Name</label>
-                <input type="text" class="form-control" name="institution_name" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off" pattern="[a-zA-Z ]*" value="{{ student.institution_name }}">
+                <input type="text" class="form-control" name="institution_name" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off" pattern="[a-zA-Z ]*" value="{{ student.institution_name }}" required>
             </div>
 
             <div id="semesterField" style="display: none;">

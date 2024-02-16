@@ -7,15 +7,10 @@
             <h1 class="card-title display-6" >Student Registration-Page</h1>
             {% csrf_token %}
             <div class="form-group">
-                <label for="exampleDataList" class="form-label">Gender</label>
-                <select class="form-control" id="id_gender_type" name="gender" autocomplete="off" required>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                </select>
                 <label for="exampleDataList" class="form-label">Institution Type</label>
                 <select class="form-control" id="id_institution_type" name="ins_type" autocomplete="off" required>
-                    <option value="School">School</option>
-                    <option value="University">University</option>
+                    <option value="University" {% if teacher_type == 'University' %}selected{% endif %}>University</option>
+                    <option value="School" {% if teacher_type == 'School' %}selected{% endif %}>School</option>
                 </select>
                 <div class="form-group" id="semesterField" style="display: none;">
                     <label for="id_semester">Semester</label>
@@ -30,6 +25,11 @@
                     <label for="exampleInputEmail1" class="form-label">Institution Name</label>
                     <input type="text" class="form-control" name="institution_name" id="exampleInputEmail1" aria-describedby="emailHelp" autocomplete="off" pattern="[a-zA-Z\s]+" required>
                 </div>
+                <label for="exampleDataList" class="form-label">Gender</label>
+                <select class="form-control" id="id_gender_type" name="gender" autocomplete="off" required>
+                    <option value="Male" {% if gender == 'Male' %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if gender == 'Female' %}selected{% endif %}>Female</option>
+                </select>
 
             </div>
             <div class="mb-3">

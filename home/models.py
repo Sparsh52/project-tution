@@ -18,6 +18,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator
 import uuid 
+from django.db.models import Avg, F
 User = settings.AUTH_USER_MODEL
 
 class UserManager(BaseUserManager):    
@@ -167,7 +168,16 @@ class Teacher(models.Model):
             (self.subject2, self.subject2),
             (self.subject3, self.subject3),
         ]
-
+    
+    @property
+    def average_rating(self):
+        avg_rating=Feedback.objects.filter(teacher=self).values('rating').aggregate(Avg('rating'))['rating__avg']
+        print(f"In avg rating{str(avg_rating)}")
+        return range(int(avg_rating)) if avg_rating else None
+    @property
+    def rating(self):
+        avg_rating=Feedback.objects.filter(teacher=self).values('rating').aggregate(Avg('rating'))['rating__avg']
+        return int(avg_rating) if avg_rating else 1
     def __str__(self):
         return self.user.name
 
@@ -217,8 +227,8 @@ class Event(models.Model):
     id=models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False) 
     created_by=models.ForeignKey(Teacher,on_delete=models.CASCADE)
     booked_by=models.ForeignKey(Student,on_delete=models.CASCADE,blank=True,null=True)
-    title = models.CharField(max_length=200,blank=False)
-    description = models.TextField(blank=False)
+    title = models.CharField(max_length=50,blank=False)
+    description = models.TextField(max_length=50,blank=False)
     start_time = models.DateTimeField(blank=False, null=True)
     end_time = models.DateTimeField(blank=False, null=True)
     event_cost=models.IntegerField(default=0,blank=False)
@@ -245,9 +255,10 @@ class SessionRequest(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='received_requests')
     start_time = models.DateTimeField(blank=False,null=True)
     end_time = models.DateTimeField(blank=False,null=True)
-    title=models.CharField(max_length=100,blank=False)
-    message = models.TextField(blank=False)
+    title=models.CharField(max_length=50,blank=False)
+    message = models.TextField(max_length=50,blank=False)
     requested_cost=models.IntegerField(default=0,blank=False)
+    is_approved=models.BooleanField(default=False)
     
 class Notification(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE,blank=True,null=True)

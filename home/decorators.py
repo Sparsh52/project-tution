@@ -4,6 +4,8 @@ from django.shortcuts import render, redirect
 from functools import wraps
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.urls import reverse
+from django.urls import resolve
 
 def logindec(view_func):
     @wraps(view_func)
@@ -19,7 +21,8 @@ def logindec(view_func):
                     return redirect('/teacher-profile-teacher/')
             except Teacher.DoesNotExist:
                 student = Student.objects.get(user=request.user)
-                if next_page is not None and next_page!='http://127.0.0.1:8000/':
+                print(next_page)
+                if next_page is not None and next_page!="http://127.0.0.1:8000/":
                     return redirect(next_page)
                 else:
                     return redirect('/student-profile/')

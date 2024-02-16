@@ -17,13 +17,13 @@
         }
 
         .navbar-brand-heading {
-            font-size: 20px; 
+            font-size: 25px; 
             font-family: 'sans-serif';
             text-decoration: none;
             text-transform: none;
         }
         .navbar-brand {
-            font-size: 8px; 
+            font-size: 15px; 
             font-family:Helvetica, sans-serif;
             margin-left:7px;
             a{
@@ -118,7 +118,7 @@
                 <li><a class="navbar-brand" href="/booked-slots-students/" style="color: white;"><b>Booked Slots</b></a></li>
                 <li><a class="navbar-brand" href="/view-wallet/" style="color: white;"><b>Wallet</b></a></li>
                 <li><a class="navbar-brand" href="/requested-sessions/" style="color: white;"><b>Requested Sessions</b></a></li>
-                </ul>
+            </ul>
                 <div class="d-flex dropstart">
                     <div class="collapse navbar-collapse dropstart" id="navbarNavDarkDropdown">
                       <ul class="navbar-nav">
@@ -198,7 +198,7 @@
             const newAnchor = document.createElement('a');
             newAnchor.className = 'dropdown-item text-wrap';
             newAnchor.href = `#`;
-            newAnchor.textContent = notification.message; // Adjust the field name as needed
+            newAnchor.textContent = notification.message.toLowerCase(); // Adjust the field name as needed
             newAnchor.setAttribute('data-notification-id', notification.id); // Store the notification ID as a data attribute
             newAnchor.addEventListener('click', handleNotificationClick);
             newLi.appendChild(newAnchor);

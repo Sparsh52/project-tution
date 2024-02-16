@@ -1,10 +1,16 @@
-
 {% extends "base5.html" %}
 {% block content %}
     <h2 class="mb-4">Session Requests</h2>
+    {% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-danger message" role="alert"> {{ message }}
+        </div>
+    {% endfor %}
+    {% endif %}
     {% if session_requests %}
         <div class="card-deck">
             {% for request in session_requests %}
+                {% if not request.is_approved %}
                     <div class="card mb-4">
                         <div class="card-body d-flex align-items-center">
                             <div class="col-md-2">
@@ -17,13 +23,46 @@
                                 <p class="card-text">{{ request.message }}</p>
                                 <p class="card-text"> &#8377;{{ request.requested_cost }}</p>
                                 <a href="{% url 'approve_session_requests' session_id=request.id %}" class="btn btn-warning">Approve</a>
-                                <a href="/delete-request/{{ request.id }}" class="btn btn-danger">Delete</a>
+                                <button class="btn btn-danger reject-btn" data-request-id="{{ request.id }}">Reject</button>
                             </div>
                         </div>
                     </div>
+                {% endif %}
             {% endfor %}
         </div>
     {% else %}
-        <p>No session requests at the moment.</p>
+            <div class="alert alert-info" role="alert">
+                No Session Requests.
+        </div>
     {% endif %}
+
+    <script>
+        // Add event listener to all reject buttons
+        document.querySelectorAll('.reject-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                // Show a confirmation dialog
+                var confirmReject = confirm('Are you sure you want to reject this session request?');
+
+                // If the user confirms, proceed with the rejection
+                if (confirmReject) {
+                    var requestId = btn.getAttribute('data-request-id');
+                    window.location.href = '/delete-request/' + requestId;
+                }
+            });
+        });
+    </script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+      $(document).ready(function() {
+          // Timeout for message disappearance
+          setTimeout(function() {
+              $('.alert-danger').fadeOut('slow');
+          }, 2000); // Adjust the time in milliseconds as needed
+  
+          // Delete message on click (optional)
+          $('.del-msg').on('click', function() {
+              $(this).parent().hide();
+          });
+      });
+    </script>
 {% endblock %}

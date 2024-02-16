@@ -35,8 +35,9 @@ def home(request):
         password = request.POST.get('password')
         print(email,password)
         if not User.objects.filter(email=email).exists():
+            context={'email':email}
             messages.error(request, 'Invalid Email,Please Register yourself')
-            return  render(request,"login.html")
+            return  render(request,"login.html",context)
         user = authenticate(email=email, password=password)
         if user is None:
             messages.error(request, 'Invalid Password')
@@ -48,15 +49,14 @@ def home(request):
             try:
                 print("LOL6")
                 teacher = Teacher.objects.get(user=user)
-                if next_page is not None and next_page!='http://127.0.0.1:8000/':
+                if next_page is not None and next_page!="http://127.0.0.1:8000/":
                     return redirect(next_page)
                 else:
                     return redirect('teacher-profile-teacher/')
             except Teacher.DoesNotExist:
                 try:
-                    print("LOL5")
                     student = Student.objects.get(user=user)
-                    if next_page is not None and next_page!='http://127.0.0.1:8000/':
+                    if next_page is not None and next_page!="http://127.0.0.1:8000/":
                         return redirect(next_page)
                     else:
                         return redirect('/student-profile/')
@@ -109,48 +109,57 @@ def add_feedback(request, teacher_id):
 @never_cache
 @login_required(login_url='home')
 def student_profile(request):
-    student = Student.objects.get(user=request.user)
-    context = {
+    try:
+        student = Student.objects.get(user=request.user)
+        context = {
         'student': student,
-    }
-    return render(request, 'student_profile.html', context)
+        }
+        return render(request, 'student_profile.html', context)
+    except Student.DoesNotExist:
+        return render(request,"error.html")
+
 
 
 @never_cache
 @login_required(login_url='home')
 def teachers_list(request):
-   student = Student.objects.get(user=request.user)
-   registered_teachers_ids = student.teachers.values_list('id', flat=True)
-   queryset = Teacher.objects.exclude(id__in=registered_teachers_ids)
-   search_query = request.GET.get('search_query')
-   hourly_price = request.GET.get('hourlyPrice')
-   experience = request.GET.get('experience')
-   subject = request.GET.get('subject')
-   teacher_type = request.GET.get('teacherType')
-   standard_or_semester = request.GET.get('standard_or_semester')
-   if search_query:
-      subjects_filter = (Q(subject1__subject__icontains=search_query) | 
-                           Q(subject2__subject__icontains=search_query) | 
-                           Q(subject3__subject__icontains=search_query))
-      username_filter = Q(user__username__icontains=search_query)
-      queryset = queryset.filter(subjects_filter | username_filter)
-   if hourly_price:
-      queryset = queryset.filter(min_hourly_rate__lte=hourly_price)
-   if experience:
-      queryset = queryset.filter(experience__gte=experience)
-   if subject:
-    subjects_filter = (Q(subject1__subject__icontains=subject) | Q(subject2__subject__icontains=subject) | Q(subject3__subject__icontains=subject))
-    queryset = queryset.filter(subjects_filter) 
-   if teacher_type:
-    queryset = queryset.filter(teacher_type=teacher_type)
-   if standard_or_semester:
-        queryset = queryset.filter(standard_or_semester__lte=standard_or_semester)
-   paginator = Paginator(queryset, 2) 
-   page_number = request.GET.get("page")
-   page_obj = paginator.get_page(page_number)
-   print(page_obj)
-   context = {'teachers': page_obj,'student':student}
-   return render(request, 'teacherlist.html', context)
+    student = Student.objects.get(user=request.user)
+    registered_teachers_ids = student.teachers.values_list('id', flat=True)
+    queryset = Teacher.objects.exclude(id__in=registered_teachers_ids)
+    search_query = request.GET.get('search_query')
+    hourly_price = request.GET.get('hourlyPrice')
+    experience = request.GET.get('experience')
+    subject = request.GET.get('subject')
+    teacher_type = request.GET.get('teacherType')
+    standard_or_semester = request.GET.get('standard_or_semester')
+    rating=request.GET.get('rating')
+    if search_query:
+       subjects_filter = (Q(subject1__subject__icontains=search_query) | 
+                            Q(subject2__subject__icontains=search_query) | 
+                            Q(subject3__subject__icontains=search_query))
+       username_filter = Q(user__username__icontains=search_query)
+       queryset = queryset.filter(subjects_filter | username_filter)
+    if hourly_price:
+       queryset = queryset.filter(min_hourly_rate__lte=hourly_price)
+    if experience:
+       queryset = queryset.filter(experience__gte=experience)
+    if subject:
+     subjects_filter = (Q(subject1__subject__icontains=subject) | Q(subject2__subject__icontains=subject) | Q(subject3__subject__icontains=subject))
+     queryset = queryset.filter(subjects_filter)
+    if teacher_type:
+     queryset = queryset.filter(teacher_type=teacher_type)
+    if standard_or_semester:
+         queryset = queryset.filter(standard_or_semester__gte=standard_or_semester)
+    if rating:
+        filtered_teachers = [teacher for teacher in queryset if teacher.rating >= int(rating)]
+        filtered_teacher_ids = [teacher.id for teacher in filtered_teachers]
+        queryset = Teacher.objects.filter(pk__in=filtered_teacher_ids)
+    paginator = Paginator(queryset, 2)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    print(page_obj)
+    context = {'teachers': page_obj,'student':student}
+    return render(request, 'teacherlist.html', context)
 
 @never_cache
 def register(request):
@@ -255,7 +264,8 @@ def extracted_from_register_Teacher(request, user):
     print('Teacher Image:', img)
     if min_hourly_Rate>max_hourly_Rate:
         messages.error(request,"minimum hourly rate cannot be greater than max hourly rate")
-        return  redirect('/register-teacher/')
+        context={'max_hourly_Rate':max_hourly_Rate,'min_hourly_Rate':min_hourly_Rate,'sub1':sub1,'sub2':sub2,'sub3':sub3,'exp':exp,'standard_or_semester':standard_or_semester,'teacher_type':teacher_type,'gender':gender,'img':img}
+        return  render(request, 'teacherregistration.html',context)
     try:
         gender_instance, _ = Gender.objects.get_or_create(gender=gender.title())
         sub_instance_1, _ = Subject.objects.get_or_create(subject=sub1.title())
@@ -561,34 +571,62 @@ def update_teacher(request, teacher_id):
         print(f"min_hourly_rate_input: {min_hourly_rate_input}")
         max_hourly_rate_input = data.get("max_hourly_rate", "")
         print(f"max_hourly_rate_input: {max_hourly_rate_input}")
-        if min_hourly_rate_input:
-            try:
-                min_hourly_rate = int(min_hourly_rate_input)
-                teacher.min_hourly_rate = min_hourly_rate
-                print(f"Updated min_hourly_Rate to: {teacher.min_hourly_rate}")
-            except ValueError as e:
-                print(f"Error converting min_hourly_rate to int: {e}")
-        else:
-            print("No min_hourly_rate provided, keeping the existing value.")
-        if max_hourly_rate_input:
-            try:
-                max_hourly_rate = int(max_hourly_rate_input)
-                teacher.max_hourly_rate = max_hourly_rate
-                print(f"Updated max_hourly_Rate to: {teacher.max_hourly_rate}")
-            except ValueError as e:
-                print(f"Error converting max_hourly_rate to int: {e}")
-        else:
-            print("No min_hourly_rate provided, keeping the existing value.")
-        print(f"Updated hourly_Rate to: {teacher.min_hourly_rate} and {teacher.max_hourly_rate}")
+        print("In update teacher",min_hourly_rate_input,max_hourly_rate_input)
+        print(type(min_hourly_rate_input),type(max_hourly_rate_input))
+        print(int(min_hourly_rate_input)>int(max_hourly_rate_input))
+        if min_hourly_rate_input and max_hourly_rate_input:
+            print("update-1")
+            if int(min_hourly_rate_input)>int(max_hourly_rate_input):
+                messages.error(request, "Min hourly rate cannot be more than max hourly rate")
+                return render(request, 'teacher_update.html', {'teacher': teacher})
+            else:
+                teacher.min_hourly_rate=int(min_hourly_rate_input)
+                teacher.max_hourly_rate=int(max_hourly_rate_input)
+        # if min_hourly_rate_input and max_hourly_rate_input is teacher.max_hourly_rate:
+        #     print("update-2")
+        #     try:
+        #         min_hourly_rate = int(min_hourly_rate_input)
+        #         if min_hourly_rate>teacher.max_hourly_rate:
+        #             messages.error(request, "Min hourly rate cannot be more than max hourly rate")
+        #             return render(request, 'teacher_update.html', {'teacher': teacher})
+        #         teacher.min_hourly_rate = min_hourly_rate
+        #         print(f"Updated min_hourly_Rate to: {teacher.min_hourly_rate}")
+        #     except ValueError as e:
+        #         print(f"Error converting min_hourly_rate to int: {e}")
+        # else:
+        #     print("No min_hourly_rate provided, keeping the existing value.")
+        # if max_hourly_rate_input and min_hourly_rate_input is teacher.min_hourly_rate:
+        #     print("In update-3")
+        #     try:
+        #         max_hourly_rate = int(max_hourly_rate_input)
+        #         if max_hourly_rate<teacher.min_hourly_rate:
+        #             messages.error(request, "Min hourly rate cannot be more than max hourly rate")
+        #             return render(request, 'teacher_update.html', {'teacher': teacher})
+        #         teacher.max_hourly_rate = max_hourly_rate
+        #         print(f"Updated max_hourly_Rate to: {teacher.max_hourly_rate}")
+        #     except ValueError as e:
+        #         print(f"Error converting max_hourly_rate to int: {e}")
+        # else:
+        #     print("No min_hourly_rate provided, keeping the existing value.")
+        # print(f"Updated hourly_Rate to: {teacher.min_hourly_rate} and {teacher.max_hourly_rate}")
         sub1 = data.get("sub1", "")
-        if sub1 != "":
+        if sub1 != "" and (teacher.subject2.subject!=sub1 and teacher.subject3.subject!=sub1):
             teacher.subject1, _ = Subject.objects.get_or_create(subject=sub1.title())
+        else:
+            messages.error(request, "Duplicate Subjects")
+            return render(request, 'teacher_update.html', {'teacher': teacher})
         sub2 = data.get("sub2", "")
-        if sub2 != "":
+        if sub2 != "" and (teacher.subject1.subject!=sub2 and teacher.subject3.subject!=sub2):
             teacher.subject2, _ = Subject.objects.get_or_create(subject=sub2.title())
+        else:
+            messages.error(request, "Duplicate Subjects")
+            return render(request, 'teacher_update.html', {'teacher': teacher})
         sub3 = data.get("sub3", "")
-        if sub3 != "":
+        if sub3 != "" and (teacher.subject1.subject!=sub3 and teacher.subject2.subject!=sub3):
             teacher.subject3, _ = Subject.objects.get_or_create(subject=sub3.title())
+        else:
+            messages.error(request, "Duplicate Subjects")
+            return render(request, 'teacher_update.html', {'teacher': teacher})
         exp = int(data["exp"]) if "exp" in data and data["exp"] != '' else teacher.experience
         teacher.experience = exp
         gender = data.get("gender", "")
@@ -724,18 +762,15 @@ def request_session(request, teacher_id):
             cost=form.cleaned_data['requested_cost']
             start_time=form.cleaned_data['start_time']
             end_time=form.cleaned_data['end_time']
-            print(start_time)
-            print(end_time)
-            print(start_time.date())
-            print(end_time.date())
-            print(start_time.time())
-            print(end_time.time())
-            if start_time is None:
-                messages.error(request,"Start date cannot be empty")
-                return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
-            if end_time is None:
-                messages.error(request,"end date cannot be empty")
-                return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
+            if start_time.date()==end_time.date():
+                print(end_time-start_time)
+                time_difference=end_time-start_time
+                hours_difference = time_difference.total_seconds() / 3600
+                print(hours_difference)
+                if hours_difference >= 1:
+                    print("Session is valid. Duration:", hours_difference, "hours")
+                else:
+                    print("Session is less than 1 hour. Ignoring.")
             if start_time>end_time:
                 messages.error(request,"Start date cannot be more than end date")
                 return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
@@ -745,16 +780,23 @@ def request_session(request, teacher_id):
             if student.wallet.balance-cost<=0:
                 messages.error(request,"Plz refill your wallet balance")
                 return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
-            if SessionRequest.objects.filter(start_time__date__gt=start_time.date(),end_time__date__lt=end_time.date()).exists():
+            if SessionRequest.objects.filter(Q(student=student),start_time__date__gt=start_time.date(),end_time__date__lt=end_time.date()).exists():
                 print("Already a slot exist within this timeline")
                 messages.error(request,"Already a session exist within this timeline")
                 return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
-            if SessionRequest.objects.filter(Q(start_time__date__gte=start_time.date(),end_time__date__lte=end_time.date()) &
+            if SessionRequest.objects.filter(Q(student=student) & Q(start_time__date__gte=start_time.date(),end_time__date__lte=end_time.date()) &
                                 (Q(start_time__time__lte=start_time.time(),end_time__time__gte=end_time.time())|
-                                Q(start_time__time__gte=start_time.time(),end_time__time__lte=end_time.time()))).exists():
+                                Q(start_time__time__gte=start_time.time(),end_time__time__lte=end_time.time())|
+                                Q(start_time__time__lte=end_time.time(),end_time__time__gte=end_time.time())|
+                                Q(start_time__time__lte=start_time.time(),end_time__time__gte=start_time.time())
+                                )).exists():
                 print("Not Possible")
                 messages.error(request,"Already a session exist")
                 return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id}))
+            time_difference = end_time - start_time
+            if time_difference < timedelta(hours=1):
+                messages.error(request,"Minimum One hour Session")
+                return redirect(reverse('request_session', kwargs={'teacher_id': teacher.id})) 
             session_request = form.save(commit=False)
             session_request.student = student
             session_request.teacher = teacher
@@ -771,7 +813,7 @@ def request_session(request, teacher_id):
 @login_required(login_url='home')
 def view_session_requests(request):
     teacher = Teacher.objects.get(user=request.user)
-    session_requests = SessionRequest.objects.filter(teacher=teacher)
+    session_requests = SessionRequest.objects.filter(teacher=teacher,is_approved=False).order_by('-id')
     print(session_requests)
     return render(request, 'view_session_requests.html', {'session_requests': session_requests,'teacher':teacher})
 
@@ -779,6 +821,16 @@ def view_session_requests(request):
 @login_required(login_url='home')
 def approve_session_requests(request,session_id):
     session=SessionRequest.objects.get(id=session_id)
+    if Event.objects.filter(Q(created_by=session.teacher) & Q(start_time__date__gt=session.start_time.date(),end_time__date__lt=session.end_time.date())).exists():
+        messages.error(request,"Already an event exist in this timeline")
+        return redirect("/view-session-requests/")
+    if Event.objects.filter(Q(created_by=session.teacher) & Q(start_time__date__gte=session.start_time.date(),end_time__date__lte=session.end_time.date()) &
+                                (Q(start_time__time__lte=session.start_time.time(),end_time__time__gte=session.end_time.time())|
+                                Q(start_time__time__gte=session.start_time.time(),end_time__time__lte=session.end_time.time())|
+                                Q(start_time__time__lte=session.end_time.time(),end_time__time__gte=session.end_time.time())|
+                                Q(start_time__time__lte=session.start_time.time(),end_time__time__gte=session.start_time.time()))).exists():
+        messages.error(request,"Already an event exist on same date")
+        return redirect("/view-session-requests/")
     print(session.teacher)
     print(session.student)
     print(session.start_time)
@@ -796,7 +848,8 @@ def approve_session_requests(request,session_id):
         print(teacher.wallet.balance)
         teacher.wallet.deposit(event_cost)
         print(teacher.wallet.balance)
-        session.delete()
+        session.is_approved=True
+        session.save()
         return redirect('/booked-slots-teacher/')
     else:
         event.delete()
@@ -807,7 +860,7 @@ def approve_session_requests(request,session_id):
 @login_required(login_url='home')
 def requested_sessions(request):
     student=Student.objects.get(user=request.user)
-    sessions=SessionRequest.objects.filter(student=student)
+    sessions=SessionRequest.objects.filter(student=student,is_approved=False).order_by('-id')
     return render(request, 'view_session_requests_student.html', {'session_requests': sessions,'student':student})
 
 
@@ -817,4 +870,32 @@ def delete_request(request,session_id):
     session=SessionRequest.objects.filter(id=session_id)
     session.delete()
     return redirect('/view-session-requests/')
+
+
+@never_cache
+@login_required(login_url='home')
+def reset_session_view(request, session_id):
+    session = get_object_or_404(SessionRequest, id=session_id)
+    student=Student.objects.get(user=request.user)
+    if request.method == 'POST':
+        form = ResetSessionModelForm(request.POST, instance=session)
+        if form.is_valid():
+            cost=form.cleaned_data['requested_cost']
+            if cost<0:
+                messages.error(request,"Negative Cost")
+                return redirect(reverse('reset_session_view', kwargs={'session_id': session.id}))
+            if student.wallet.balance-cost<=0:
+                messages.error(request,"Plz refill your wallet balance")
+                return redirect(reverse('reset_session_view', kwargs={'session_id': session.id}))
+            session.requested_cost = form.cleaned_data['requested_cost']
+            session.title = form.cleaned_data['title']
+            session.message=form.cleaned_data['message']
+            session.save()
+            return redirect('/requested-sessions/')
+    else:
+        form = ResetSessionModelForm(instance=session)
+    return render(request, 'reset_session.html', {'form': form, 'session': session,'student':student})
+
+# def custom_404_view(request, exception):
+#     return render(request, 'custom_404.html', status=404)
 

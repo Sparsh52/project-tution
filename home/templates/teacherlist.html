@@ -20,7 +20,7 @@
         <div class="row">
             <div class="col-lg-3 shadow-lg rounded">
                 <div class="row mt-3 mb-3">
-                    <form action="/teachers-list/" method="GET">
+                    <form action="/teachers-list/" method="GET" onsubmit="return validateForm()">
                         {% csrf_token %}
                         <div class="col-md-12">
                             <label for="hourlyPrice"> Maximum Hourly Price</label>
@@ -38,13 +38,24 @@
                             <label for="teacherType">Teacher Type</label>
                             <select name="teacherType" id="teacherType" class="form-control">
                                 <option value="" {% if not request.GET.teacherType %}selected{% endif %}>Select</option>
-                                <option value="College" {% if request.GET.teacherType == 'College' %}selected{% endif %}>College</option>
+                                <option value="University" {% if request.GET.teacherType == 'University' %}selected{% endif %}>University</option>
                                 <option value="School" {% if request.GET.teacherType == 'School' %}selected{% endif %}>School</option>
                             </select>
                         </div><br>                        
                         <div class="col-md-12">
                             <label for="standard">Standard or Semester</label>
                             <input type="number" name="standard_or_semester" id="standard" class="form-control" autocomplete="off" min="1" onkeypress="return !(event.charCode == 46)" value="{{ request.GET.standard_or_semester }}">
+                        </div><br>
+                        <div class="col-md-12">
+                            <label for="rating">Rating:</label>
+                            <select class="form-control" id="rating" name="rating">
+                                <option value="" selected disabled>Select Rating</option>
+                                <option value="1" {% if request.GET.rating == '1' %}selected{% endif %}>1</option>
+                                <option value="2" {% if request.GET.rating == '2' %}selected{% endif %}>2</option>
+                                <option value="3" {% if request.GET.rating == '3' %}selected{% endif %}>3</option>
+                                <option value="4" {% if request.GET.rating == '4' %}selected{% endif %}>4</option>
+                                <option value="5" {% if request.GET.rating == '5' %}selected{% endif %}>5</option>
+                            </select>
                         </div><br>
                         <div class="col-md-12">
                             <input type="submit" class="btn btn-primary btn-block" value="Apply Filters">
@@ -54,12 +65,12 @@
                 </div>
             </div>
 
-            <div class="col-lg-9 px-4 mb-5 ml-5 mt-3" margin="auto" style="font-family: 'Roboto', sans-serif;">
+            <div class="col-lg-9 mb-5 ml-5 mt-3" margin="auto" style="font-family: 'Roboto', sans-serif;">
                 {% if teachers %}
                     {% for teacher in teachers %}
-                        <div class="row search-card-result rounded shadow-lg mb-1 d-flex justify-content-center align-items-center mx-auto" style="width: 55vw;">
+                        <div class="row search-card-result p-3 rounded shadow-lg mb-1 d-flex justify-content-center align-items-center mx-auto" style="width: 100%;">
                             <div class="col-md-3">
-                                <img class="img-fluid rounded-top" src="{{ teacher.teacher_image_url }}" alt="Teacher Image" style="height: 100%;">
+                                <img class="img-fluid rounded-top" src="{{ teacher.teacher_image_url }}" alt="Teacher Image" style="height: 100%; margin: auto; display: block;">
                             </div>
                             <div class="col-md-5">
                                 <div class="card-body teacher-details">
@@ -74,6 +85,15 @@
                                         <p class="text-center"><b>Semester Uptil: {{ teacher.standard_or_semester }}<sup>th</sup></b></p>
                                     {% elif teacher.teacher_type == 'School' %}
                                         <p class="text-center"><b>Standard Uptil: {{ teacher.standard_or_semester }}<sup>th</sup></b></p>
+                                    {% endif %}
+                                    {% if teacher.average_rating %}
+                                    <p class="text-center"><b>Rating:</b>
+                                        {% for _ in teacher.average_rating %}
+                                        &#9733;  
+                                        {% endfor %}
+                                    </p>
+                                    {% else %}
+                                    <p class="text-center"><b>Rating: Not Rated</b></p>
                                     {% endif %}
                                 </div>
                             </div>
@@ -105,12 +125,27 @@
     </div>
 </section>
 <script>
+    function validateForm() {
+        var hourlyPrice = document.getElementById("hourlyPrice").value;
+        var experience = document.getElementById("experience").value;
+        var subject = document.getElementById("subject").value;
+        var teacherType = document.getElementById("teacherType").value;
+        var standard = document.getElementById("standard").value;
+        var rating=document.getElementById("rating").value;
+        if (!hourlyPrice && !experience && !subject && !teacherType && !standard && !rating) {
+            alert("Please enter at least one filter criteria!");
+            return false;  // Prevent form submission
+        }
+
+        return true;
+    }
     function clearForm() {
         document.getElementById("hourlyPrice").value = "";
         document.getElementById("experience").value = "";
         document.getElementById("subject").value = "";
         document.getElementById("teacherType").value = "";
         document.getElementById("standard").value = "";
+        document.getElementById("rating").value = "";
         window.location.href = "/teachers-list/";
     }
 </script>

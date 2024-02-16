@@ -69,7 +69,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
                 'Xdata': {
                     'count': event['Xdata']['count']
                 },
-                'all_notifications': all_notifications,
+                'all_notifications': all_notifications[:5],
             }))
         else:
                 await self.send(text_data=json.dumps({
@@ -77,7 +77,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
                     'count': event['Xdata']['count'],
                     'current_notification': event['Xdata']['current_notification'],
                 },
-                'all_notifications': all_notifications,
+                'all_notifications': all_notifications[:5],
             }))
 
         
@@ -124,87 +124,4 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             await self.send_notification({'Xdata': {'count': len(serialized_notifications), 'all_notifications': serialized_notifications,'user':user},'context':'update_notification'})
         except Notification.DoesNotExist:
             print(f"Notification with id {notification_id} not found")
-
-# class EventConsumer(AsyncWebsocketConsumer):
-#     async def connect(self):
-#         self.room_name = self.scope["url_route"]["kwargs"]["event_room_name"]
-#         self.room_group_name = 'event_%s' % self.room_name
-#         print(f"In connect event consumer{self.room_group_name}")
-#         print(self.room_group_name)
-#         await self.channel_layer.group_add(
-#             self.room_group_name,
-#             self.channel_name
-#         )
-#         await self.accept()
-
-#     async def disconnect(self, close_code):
-#         await self.channel_layer.group_discard(
-#             self.room_group_name,
-#             self.channel_name
-#         )
-#     @database_sync_to_async
-#     def get_user(self,room_name):
-#         return User.objects.get(room__name=room_name)
-
-#     async def receive(self, text_data):
-#         text_data_json = json.loads(text_data)
-#         action = text_data_json['action']
-#         if action == 'create_event':
-#             await self.create_event(text_data_json)
-#         elif action == 'send_event_on_open':
-#             await self.send_event_on_open(text_data_json)
-    
-#     async def send_event_on_open(self,d):
-#         room_name=d['eventroomName']
-#         teacher_name=d['teacherName']
-#         user=await self.get_user(room_name)
-#         events = await self.get_event(teacher_name)
-#         await self.send_events({'Events': {'count': len(events), 'all_events': events,'user':user},'context':'send_notification_on_open'})
-    
-
-#     @database_sync_to_async
-#     def get_event(self, teacher_name):
-#         print("In get event")
-#         queryset = Event.objects.filter(created_by__user__name=teacher_name, booked_by__isnull=True)
-#         print(f"0th element{str(model_to_dict(queryset[0]))}")
-#         print(queryset[0])
-#         events_data = []
-#         for event in queryset:
-#             x=event.id
-#             event_dict = model_to_dict(event)
-#             print("In LOOP"+str(event_dict.keys()))
-#             event_dict['id']=str(x)
-#             event_dict['created_by'] = str(event_dict['created_by'])
-#             # event_dict['id'] = str(event_dict['id'])
-#             event_dict['booked_by'] = str(event_dict['booked_by']) if event_dict['booked_by'] else None
-#             event_dict['start_time'] = event_dict['start_time'].isoformat()
-#             event_dict['end_time'] = event_dict['end_time'].isoformat()
-#             events_data.append(event_dict)
-#         return events_data
-
-    
-#     async def send_events(self, event):
-#         if event['context']=='send_notification_on_open':
-#             event_data = event['Events']
-#             all_events = event_data['all_events']
-#             await self.send(text_data=json.dumps({
-#                     'action': 'send_events',
-#                     'Events': {
-#                 'count': event_data['count'],
-#                 'all_events': all_events,
-#                 },
-#             }))
-#         else:
-#             print("In send event else")
-#             print(event['Xdata'])
-#             count=event['Xdata']['count']
-#             print(count)
-#             print(model_to_dict(event['Xdata']['current_event']))
-#             all_events=await self.get_event(str(event['Xdata']['current_event']['created_by']))
-#             await self.send(text_data=json.dumps({
-#                     'action': 'send_events',
-#                     'Events': {
-#                 'count': count,
-#                 'all_events': all_events,
-#                 },
-#             }))
+            

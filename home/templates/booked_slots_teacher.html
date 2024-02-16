@@ -12,15 +12,22 @@
 </style>
 
 <div class="col-lg-9 px-4 mb-5 ml-5">
-    {% for event in events %}
-        <div class="card mb-4 shadow-lg" style="width: 75rem;">
-            <div class="card-body slot-details text-center">
-                <h5 class="card-title"><b>{{ event.title }}</b></h5>
-                <p class="card-text"><b>Start Time:</b> {{ event.start_time|date:"F d, Y" }} {{ event.start_time|time:"g:i A" }}</p>
-                <p class="card-text"><b>End Time:</b> {{ event.end_time|date:"F d, Y" }} {{ event.end_time|time:"g:i A" }}</p>
-                <a href="{% if event.created_by %}/event-edit/{{ event.created_by.id }}/{{ event.id }}{% endif %}" class="btn btn-warning">Check Slots</a>
+    <h2 class="mb-4">Booked Slots</h2>
+    {% if events %}
+        {% for event in events %}
+            <div class="card mb-4 shadow-lg" style="width: 75rem;">
+                <div class="card-body slot-details text-center">
+                    <h5 class="card-title"><b>{{ event.title }}</b></h5>
+                    <p class="card-text"><b>Start Time:</b> {{ event.start_time|date:"F d, Y" }} {{ event.start_time|time:"g:i A" }}</p>
+                    <p class="card-text"><b>End Time:</b> {{ event.end_time|date:"F d, Y" }} {{ event.end_time|time:"g:i A" }}</p>
+                    <a href="{% if event.created_by %}/event-edit/{{ event.created_by.id }}/{{ event.id }}{% endif %}" class="btn btn-warning">Check Slots</a>
+                </div>
             </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            No booked events.
         </div>
-    {% endfor %}
+    {% endif %}
 </div>
 {% endblock %}

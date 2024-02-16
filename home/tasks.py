@@ -21,6 +21,7 @@ def broadcast_notification_student(self,instance,room_name,count):
     print(channel_layer)
     room_group_name = 'notify_%s' % room_name
     data = {'count': count,'current_notification':instance['message'],'user':str(instance['user'])}
+    loop=None
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(channel_layer.group_send(room_group_name,{
@@ -32,6 +33,7 @@ def broadcast_notification_student(self,instance,room_name,count):
 @shared_task(bind = True)
 def broadcast_notification_teacher(self,instance,room_name,count):
     # sourcery skip: replace-interpolation-with-fstring
+    print(f"instance is{str(instance)}")
     print(f"In broadcast Notification teacher{instance}")
     room_name = room_name
     print(room_name)
@@ -39,7 +41,8 @@ def broadcast_notification_teacher(self,instance,room_name,count):
     print(channel_layer)
     room_group_name = 'notify_%s' % room_name
     data = {'count': count,'current_notification':instance['message'],'user':str(instance['user'])}
-    loop = asyncio.new_event_loop()
+    loop=None
+    loop = asyncio.get_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(channel_layer.group_send(room_group_name,{
                 "type": "send_notification",

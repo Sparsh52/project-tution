@@ -39,6 +39,15 @@
                                 {% elif teacher.teacher_type == 'School' %}
                                     <p class="text-center"><b>Standard Uptil: {{ teacher.standard_or_semester }}<sup>th</sup></b></p>
                                 {% endif %}
+                                {% if teacher.average_rating %}
+                                <p class="text-center"><b>Rating:</b>
+                                    {% for _ in teacher.average_rating %}
+                                    &#9733;  
+                                    {% endfor %}
+                                </p>
+                                {% else %}
+                                <p class="text-center"><b>Rating: Not Rated</b></p>
+                                {% endif %}
                             </div>
                         </div>
                         

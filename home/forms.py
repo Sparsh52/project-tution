@@ -8,6 +8,7 @@ import re
 from django.utils.timezone import now
 from .models import Event
 from django.db.models import Q
+from django.utils import timezone
 
 class FutureDateInput(forms.DateInput):
     input_type = 'datetime-local'
@@ -112,12 +113,16 @@ class EventForm(ModelForm):
         self.fields['start_time'].disabled = True
         self.fields['end_time'].disabled = True
         self.fields['description'].disabled = True
-
       if self.instance and hasattr(self.instance, 'created_by') and self.instance.created_by:
        self.fields['created_by'].disabled = True
        self.fields['booked_by'].initial = user
       if self.instance and hasattr(self.instance, 'booked_by') and self.instance.booked_by:
        self.fields['booked_by'].disabled = True
+       self.fields['title'].disabled = True
+       self.fields['start_time'].disabled = True
+       self.fields['end_time'].disabled = True
+       self.fields['description'].disabled = True
+       self.fields['event_cost'].disabled=True
   def clean_event_cost(self):
     cost = self.cleaned_data.get("event_cost")
     if cost is not None and (cost < 0 or not isinstance(cost, int)):
@@ -144,35 +149,59 @@ class EventForm(ModelForm):
     return description
   
   def clean(self):
-    cleaned_data = super().clean()
-    start_time =  cleaned_data.get("start_time")
-    print(type(start_time))
-    print(type(start_time))
-    if start_time is None:
-        self._errors['start_time'] = self.error_class(["Start time cannot be None."])
-    print(start_time)
-    end_time = cleaned_data.get("end_time")
-    print(end_time)
-    if start_time > end_time:
-        self._errors['end_time'] = self.error_class(["End date cannot be more than start date."])
-    start_time_obj = start_time.strftime('%H:%M:%S')
-    start_date_obj = start_time.strftime('%Y-%m-%d')
-    end_date_obj = end_time.strftime('%Y-%m-%d')
-    end_time_obj = end_time.strftime('%H:%M:%S')
-    current_datetime = datetime.now()
-    if start_time.date() == current_datetime.date() and start_time.time() < current_datetime.time():
-        self._errors['start_time'] = self.error_class([f"select time more than {current_datetime.time().strftime('%H:%M')}"])
-    if end_time.date() == current_datetime.date() and end_time.time() < current_datetime.time():
-       self._errors['end_time'] = self.error_class([f"select time more than {current_datetime.time().strftime('%H:%M')}"])
-    if Event.objects.filter(start_time__date__gt=start_date_obj,end_time__date__lt=end_date_obj).exists():
-       self._errors['end_time'] = self.error_class(["Already an event exist within this timeline."])
-       self._errors['start_time'] = self.error_class(["Already an event exist within this timeline"])
-    if Event.objects.filter(Q(start_time__date__gte=start_date_obj,end_time__date__lte=end_date_obj) &
-                                (Q(start_time__time__lte=start_time_obj,end_time__time__gte=end_time_obj)|
-                                Q(start_time__time__gte=start_time_obj,end_time__time__lte=end_time_obj))).exists():
-       self._errors['end_time'] = self.error_class(["Already an event exist on same date."])
-       self._errors['start_time'] = self.error_class(["Already an event exist on same date."])
-    return cleaned_data
+      cleaned_data = super().clean()
+      start_time =  cleaned_data.get("start_time")
+      print("-------------------------------------------------------------------")
+      print(cleaned_data)
+      created_by=cleaned_data.get("created_by")
+      print(start_time)
+      end_time = cleaned_data.get("end_time")
+      print(end_time)
+      if start_time.date()==end_time.date():
+         print(end_time-start_time)
+         time_difference=end_time-start_time
+         hours_difference = time_difference.total_seconds() / 3600
+         print(hours_difference)
+         if hours_difference >= 1:
+            print("Session is valid. Duration:", hours_difference, "hours")
+         else:
+            print("Session is less than 1 hour. Ignoring.")
+            self._errors['end_time'] = self.error_class(["Minimum One hour Session."])
+            self._errors['start_time'] = self.error_class(["Minimum One hour Session."])
+      if start_time>end_time:
+          print(f"In clean{start_time.date()}{end_time.date()}")
+          self._errors['end_time'] = self.error_class(["End date cannot be more than start date."])
+          self._errors['start_time'] = self.error_class(["End date cannot be more than start date."])
+      start_time_obj = start_time.strftime('%H:%M:%S')
+      start_date_obj = start_time.strftime('%Y-%m-%d')
+      end_date_obj = end_time.strftime('%Y-%m-%d')
+      end_time_obj = end_time.strftime('%H:%M:%S')
+      current_datetime = datetime.now()
+      if start_time.date() == current_datetime.date() and start_time.time() < current_datetime.time():
+          self._errors['start_time'] = self.error_class([f"select time more than {current_datetime.time().strftime('%H:%M')}"])
+      if end_time.date() == current_datetime.date() and end_time.time() < current_datetime.time():
+         self._errors['end_time'] = self.error_class([f"select time more than {current_datetime.time().strftime('%H:%M')}"])
+      if Event.objects.filter(Q(created_by=created_by) & Q(start_time__date__gt=start_date_obj,end_time__date__lt=end_date_obj)).exists():
+         print(Event.objects.filter(Q(created_by=created_by) & Q(start_time__date__gt=start_date_obj,end_time__date__lt=end_date_obj)).exists())
+         self._errors['end_time'] = self.error_class(["Already an event exist within this timeline."])
+         self._errors['start_time'] = self.error_class(["Already an event exist within this timeline"])
+      if Event.objects.filter(Q(created_by=created_by) & Q(start_time__date__gte=start_date_obj,end_time__date__lte=end_date_obj) &
+                                  (Q(start_time__time__lte=start_time_obj,end_time__time__gte=end_time_obj)|
+                                  Q(start_time__time__gte=start_time_obj,end_time__time__lte=end_time_obj)|
+                                  Q(start_time__time__lte=end_time_obj,end_time__time__gte=end_time_obj)|
+                                  Q(start_time__time__lte=start_time_obj,end_time__time__gte=start_time_obj))).exists():
+         print(Event.objects.filter(Q(created_by=created_by) & Q(start_time__date__gte=start_date_obj,end_time__date__lte=end_date_obj) &
+                                  (Q(start_time__time__lte=start_time_obj,end_time__time__gte=end_time_obj)|
+                                  Q(start_time__time__gte=start_time_obj,end_time__time__lte=end_time_obj)|
+                                  Q(start_time__time__lte=end_time_obj,end_time__time__gte=end_time_obj)|
+                                  Q(start_time__time__lte=start_time_obj,end_time__time__gte=start_time_obj))))
+         self._errors['end_time'] = self.error_class(["Already an event exist on same date."])
+         self._errors['start_time'] = self.error_class(["Already an event exist on same date."])
+      # time_difference = end_time - start_time
+      # if time_difference < timedelta(hours=1):
+      #    self._errors['end_time'] = self.error_class(["Minimum One hour Session."])
+      #    self._errors['start_time'] = self.error_class(["Minimum One hour Session."])
+      return cleaned_data
     
 
  
@@ -181,7 +210,7 @@ class EventForm(ModelForm):
 class SessionRequestForm(forms.ModelForm):
     class Meta:
         model = SessionRequest
-        exclude=['student','teacher','is_booked']
+        exclude=['student','teacher','is_approved']
         widgets = {
       'start_time': FutureDateInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
       'end_time': FutureDateInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
@@ -199,6 +228,15 @@ class SessionRequestForm(forms.ModelForm):
             self.fields['title']=forms.ChoiceField(choices=instance.title_choices)
             self.fields['title'].widget.attrs['class'] = 'form-control'
             self.fields['title'].choices = instance.title_choices
+
+ 
             
     
-    
+class ResetSessionModelForm(forms.ModelForm):
+    class Meta:
+        model = SessionRequest
+        exclude=['student','teacher','is_approved','start_time','end_time']
+    def __init__(self, *args, **kwargs):
+        super(ResetSessionModelForm, self).__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+           field.widget.attrs['class'] = 'form-control'
